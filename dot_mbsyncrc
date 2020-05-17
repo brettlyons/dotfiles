@@ -1,0 +1,96 @@
+# mbsyncrc based on
+# http://www.ict4g.net/adolfo/notes/2014/12/27/EmacsIMAP.html
+# ACCOUNT INFORMATION
+IMAPAccount fastmail
+# Address to connect to
+Host imap.fastmail.com
+User blyons@fastmail.com
+PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/.mailpass.gpg"
+AuthMechs LOGIN
+SSLType IMAPS
+SSLVersions TLSv1.2
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+# THEN WE SPECIFY THE LOCAL AND REMOTE STORAGE
+# - THE REMOTE STORAGE IS WHERE WE GET THE MAIL FROM (E.G., THE
+#   SPECIFICATION OF AN IMAP ACCOUNT)
+# - THE LOCAL STORAGE IS WHERE WE STORE THE EMAIL ON OUR COMPUTER
+
+# REMOTE STORAGE (USE THE IMAP ACCOUNT SPECIFIED ABOVE)
+IMAPStore fastmail-remote
+Account fastmail
+
+# LOCAL STORAGE (CREATE DIRECTORIES with mkdir -p ~/Maildir/fastmail)
+MaildirStore fastmail-local
+Path ~/.mail/fastmail/
+Inbox ~/.mail/fastmail/Inbox
+
+# REQUIRED ONLY IF YOU WANT TO DOWNLOAD ALL SUBFOLDERS; SYNCING SLOWS DOWN
+# SubFolders Verbatim
+
+# CONNECTIONS SPECIFY LINKS BETWEEN REMOTE AND LOCAL FOLDERS
+#
+# CONNECTIONS ARE SPECIFIED USING PATTERNS, WHICH MATCH REMOTE MAIl
+# FOLDERS. SOME COMMONLY USED PATTERS INCLUDE:
+#
+# 1 "*" TO MATCH EVERYTHING
+# 2 "!DIR" TO EXCLUDE "DIR"
+# 3 "DIR" TO MATCH DIR
+
+Channel fastmail-inbox
+Master :fastmail-remote:"Inbox"
+Slave :fastmail-local:"Inbox"
+# Patterns "Inbox"
+Create Both
+Expunge Both
+SyncState *
+
+Channel fastmail-trash
+Master :fastmail-remote:"Trash"
+Slave :fastmail-local:"Trash"
+Create Both
+Expunge Both
+SyncState *
+
+Channel fastmail-sent
+Master :fastmail-remote:"Sent"
+Slave :fastmail-local:"Sent"
+Create Both
+Expunge Both
+SyncState *
+
+Channel fastmail-archive
+Master :fastmail-remote:"Archive"
+Slave :fastmail-local:"Archive"
+Create Both
+Expunge Both
+SyncState *
+
+Channel fastmail-drafts
+Master :fastmail-remote:"Drafts"
+Slave :fastmail-local:"Drafts"
+Create Both
+Expunge Both
+SyncState *
+
+Channel fastmail-spam
+Master :fastmail-remote:"Spam"
+Slave :fastmail-local:"Spam"
+Create Both
+Expunge Both
+SyncState *
+
+# GROUPS PUT TOGETHER CHANNELS, SO THAT WE CAN INVOKE
+# MBSYNC ON A GROUP TO SYNC ALL CHANNELS
+#
+# FOR INSTANCE: "mbsync gmail" GETS MAIL FROM
+# "gmail-inbox", "gmail-sent", and "gmail-trash"
+#
+
+Group fastmail
+Channel fastmail-inbox
+Channel fastmail-sent
+Channel fastmail-trash
+Channel fastmail-archive
+Channel fastmail-drafts
+Channel fastmail-spam
