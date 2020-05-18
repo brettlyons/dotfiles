@@ -1,0 +1,9 @@
+account blyons@fastmail.com
+host smtp.fastmail.com
+port 587
+tls on
+tls_starttls on
+auth on
+user blyons@fastmail.com
+passwordeval gpg --no-tty -q -d ~/.mailpass.gpg
+from blyons@fastmail.com

@@ -132,7 +132,7 @@ set forward_quote                    # include message in forwards
 
 # Sending mail
 set from     = "blyons@fastmail.com"
-set sendmail = "msmtp -a fastmail"
+set sendmail = "msmtp -a blyons@fastmail.com"
 set sendmail_wait = 0
 set record   = "+fastmail/Sent" # Put it into sent
 
