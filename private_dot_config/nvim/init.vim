@@ -6,11 +6,12 @@ endif
 
 call plug#begin(stdpath('data') . '/plugged')
 
-Plug 'jceb/vim-orgmode'
-Plug 'vim-scripts/utl.vim'
+" Filetypes
+" Plug 'jceb/vim-orgmode'
+" Plug 'chrisbra/NrrwRgn'
+" Plug 'vim-scripts/utl.vim'
 Plug 'vimwiki/vimwiki'
 Plug 'tpope/vim-markdown'
-Plug 'chrisbra/NrrwRgn'
 Plug 'editorconfig/editorconfig-vim'
 
 " Pretty
@@ -172,6 +173,9 @@ augroup soap
 	" Probably going to use a lot of the same words.
 	autocmd VimEnter */SOAP/** set complete=k/home/blyons/SOAP/*
 augroup END
+
+" For Sending Email
+au BufRead /tmp/neomutt-* set tw=72
 
 " Keybindings
 let mapleader = "\<Space>"
