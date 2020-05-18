@@ -3,7 +3,7 @@ set editor=nvim
 #Paths ----------------------------------------------
 set folder="~/.mail"
 set header_cache=~/.cache/neomutt
-set mailcap_path=~/.mailcap
+set mailcap_path=~/.config/neomutt/mailcap
 
 # Basic Options --------------------------------------
 set wait_key = no        # shut up, mutt
