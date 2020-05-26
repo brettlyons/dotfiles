@@ -1,0 +1,67 @@
+- hosts: localhost
+  tasks:
+      - name: install fish
+        become: yes
+        package:
+            name: fish
+            state: present
+      - name: install pass
+        become: yes
+        package:
+            name: pass
+            state: present
+      - name: install neovim
+        become: yes
+        package:
+            name: neovim
+            state: present
+      - name: install ocrmypdf
+        become: yes
+        package:
+            name: ocrmypdf
+            state: present
+      - name: install msmptp
+        become: yes
+        package:
+            name: msmtp
+            state: present
+      - name: install neomutt
+        become: yes
+        package:
+            name: neomutt
+            state: present
+      - name: install isync
+        become: yes
+        package:
+            name: isync
+            state: present
+      - name: install git
+        become: yes
+        package: 
+            name: git
+            state: present
+      - name: install curl
+        become: yes
+        package: 
+            name: curl
+            state: present
+      - name: Enable Night Light
+        dconf:
+          key: /org/gnome/settings-daemon/plugins/color/night-light-enabled
+          value: true
+      - name: Set Night Light Temperature
+        dconf:
+          key: /org/gnome/settings-daemon/plugins/color/night-light-temperature
+          value: uint32 3700
+      - name: Enable Flathub Repository
+          become: yes
+          command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      - name: Enable Flathub Repository
+          become: yes
+          command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      - name: Get vim-plug
+          remote_user: blyons
+          command: sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+      - name: Get chez-moi
+          remote_user: blyons
+          command: curl -sfL https://git.io/chezmoi | sh 

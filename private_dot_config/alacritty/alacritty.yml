@@ -111,7 +111,8 @@ font:
     # family: "gohufont"
     # family: "Iosevka Medium"
     # family: "CozetteVector"
-    family: monospace
+    # family: monospace
+    family: "Source Code Pro Medium"
     # colors
 
 
