@@ -5,58 +5,78 @@
         package:
             name: fish
             state: present
+
       - name: install pass
         become: yes
         package:
             name: pass
             state: present
+
       - name: install neovim
         become: yes
         package:
             name: neovim
             state: present
+
       - name: install ocrmypdf
         become: yes
         package:
             name: ocrmypdf
             state: present
+
       - name: install msmptp
         become: yes
         package:
             name: msmtp
             state: present
+
       - name: install neomutt
         become: yes
         package:
             name: neomutt
             state: present
+
       - name: install isync
         become: yes
         package:
             name: isync
             state: present
+
       - name: install git
         become: yes
         package: 
             name: git
             state: present
+
       - name: install curl
         become: yes
         package: 
             name: curl
             state: present
+
       - name: Get vim-plug
         remote_user: blyons
         command: sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+
       - name: Get chezmoi
         remote_user: blyons
         command: sh -c 'curl -sfL https://git.io/chezmoi | sh'
+
       - name: run chez-moi with personal dotfiles
         remote_user: blyons
         command: sh -c 'chezmoi init git@github.com:brettlyons/dotfiles.git && chezmoi update'
-      - name: Enable Flathub Repository
-        become: yes
-        command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Install Steam flatpak
+        flatpak:
+            name: com.valvesoftware.Steam 
+            state: present
+
+      - name: fetch and install Glorious Eggroll Proton
+        remote_user: blyons
+        unarchive:
+            src: https://github.com/GloriousEggroll/proton-ge-custom/releases/latest/download/*.tar.gz
+            dest: /home/blyons/.var/app/com.valvesoftware.Steam/data/Steam/compatibilitytools.d/
+
       - name: Enable Night Light
         dconf:
             key: /org/gnome/settings-daemon/plugins/color/night-light-enabled
