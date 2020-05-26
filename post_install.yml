@@ -109,6 +109,7 @@
         dconf:
             key: /org/gnome/settings-daemon/plugins/color/night-light-enabled
             value: True
+
       - name: Set Night Light Temperature
         dconf:
             key: /org/gnome/settings-daemon/plugins/color/night-light-temperature
