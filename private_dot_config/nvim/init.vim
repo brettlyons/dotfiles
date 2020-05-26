@@ -116,6 +116,10 @@ let g:lightline = { 'colorscheme': 'nord' }
 
 set background=dark
 
+" For YAML files / ansible
+autocmd FileType yaml setlocal et ts=2 ai sw=2 sts=0
+set cursorlin
+
 syntax enable
 filetype plugin indent on
 " Tabs, spelling, fancy ligatures etc
