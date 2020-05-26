@@ -45,14 +45,6 @@
         package: 
             name: curl
             state: present
-      - name: Enable Night Light
-        dconf:
-            key: /org/gnome/settings-daemon/plugins/color/night-light-enabled
-            value: True
-      - name: Set Night Light Temperature
-        dconf:
-            key: /org/gnome/settings-daemon/plugins/color/night-light-temperature
-            value: uint32 3700
       - name: Enable Flathub Repository
           become: yes
           command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -65,3 +57,11 @@
       - name: run chez-moi with personal dotfiles
           remote_user: blyons
           command: chezmoi init git@github.com:brettlyons/dotfiles.git && chezmoi update
+      - name: Enable Night Light
+        dconf:
+            key: /org/gnome/settings-daemon/plugins/color/night-light-enabled
+            value: True
+      - name: Set Night Light Temperature
+        dconf:
+            key: /org/gnome/settings-daemon/plugins/color/night-light-temperature
+            value: uint32 3700
