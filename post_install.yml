@@ -95,6 +95,7 @@
           dest: /tmp/geprotonlatest.zip
 
       - name: Make sure directories for fancy proton exist
+        file:
           path: /home/blyons/.var/app/com.valvesoftware.Steam/data/Steam/compatibilitytools.d/
           state: directory
 
