@@ -46,13 +46,13 @@
             name: curl
             state: present
       - name: Get vim-plug
-          remote_user: blyons
+        remote_user: blyons
           command: sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
       - name: Get chezmoi
-          remote_user: blyons
+        remote_user: blyons
           command: curl -sfL https://git.io/chezmoi | sh 
       - name: run chez-moi with personal dotfiles
-          remote_user: blyons
+        remote_user: blyons
           command: chezmoi init git@github.com:brettlyons/dotfiles.git && chezmoi update
       - name: Enable Flathub Repository
         become: yes
