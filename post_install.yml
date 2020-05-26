@@ -64,6 +64,7 @@
 
       - name: run chez-moi with personal dotfiles
         remote_user: blyons
+        creates: /home/blyons/.local/share/chezmoi
         command: sh -c 'chezmoi init git@github.com:brettlyons/dotfiles.git && chezmoi update'
 
       - name: Install Steam flatpak
