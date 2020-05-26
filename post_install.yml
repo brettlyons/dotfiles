@@ -53,7 +53,7 @@
         command: sh -c 'curl -sfL https://git.io/chezmoi | sh'
       - name: run chez-moi with personal dotfiles
         remote_user: blyons
-        command: chezmoi init git@github.com:brettlyons/dotfiles.git && chezmoi update
+        command: sh -c 'chezmoi init git@github.com:brettlyons/dotfiles.git && chezmoi update'
       - name: Enable Flathub Repository
         become: yes
         command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
