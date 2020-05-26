@@ -91,8 +91,8 @@
 
       - name: Download the glorious-eggroll-proton latest release
         get_url: 
-          url: "{{ json_response.json.zipball_url }}"
-          dest: /tmp/geprotonlatest.zip
+          url: "{{ json_response.json.assets[0].browser_download_url }}"
+          dest: /tmp/geprotonlatest.tar.gz
 
       - name: Make sure directories for fancy proton exist
         file:
@@ -102,7 +102,7 @@
       - name: Install Glorious Eggroll proton latest release
         remote_user: blyons
         unarchive:
-            src: /tmp/geprotonlatest.zip
+            src: /tmp/geprotonlatest.tar.gz
             dest: /home/blyons/.var/app/com.valvesoftware.Steam/data/Steam/compatibilitytools.d/
 
       - name: Enable Night Light
