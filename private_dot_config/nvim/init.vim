@@ -60,6 +60,10 @@ call plug#end()
 set undodir=~/.vimdid
 set undofile
 
+" VimWiki use markdown
+let g:vimwiki_list = [{'path': '~/vimwiki/',
+                      \ 'syntax': 'markdown', 'ext': '.md'}]"
+
 " Ripgrep replacing
 if executable('rg')
 	set grepprg=rg\ --no-heading\ --vimgrep
