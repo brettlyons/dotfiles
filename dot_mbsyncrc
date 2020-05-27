@@ -9,8 +9,8 @@ PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/.mailpass.gpg"
 AuthMechs LOGIN
 SSLType IMAPS
 SSLVersions TLSv1.2
-# CertificateFile /etc/ssl/certs/ca-certificates.crt
-CertificateFile /etc/ssl/certs/ca-bundle.crt
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+# CertificateFile /etc/ssl/certs/ca-bundle.crt
 
 # THEN WE SPECIFY THE LOCAL AND REMOTE STORAGE
 # - THE REMOTE STORAGE IS WHERE WE GET THE MAIL FROM (E.G., THE
