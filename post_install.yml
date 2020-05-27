@@ -1,0 +1,116 @@
+- hosts: localhost
+  tasks:
+      - name: install fish
+        become: yes
+        package:
+            name: fish
+            state: present
+
+      - name: install pass
+        become: yes
+        package:
+            name: pass
+            state: present
+
+      - name: install neovim
+        become: yes
+        package:
+            name: neovim
+            state: present
+
+      - name: install ocrmypdf
+        become: yes
+        package:
+            name: ocrmypdf
+            state: present
+
+      - name: install msmptp
+        become: yes
+        package:
+            name: msmtp
+            state: present
+
+      - name: install neomutt
+        become: yes
+        package:
+            name: neomutt
+            state: present
+
+      - name: install isync
+        become: yes
+        package:
+            name: isync
+            state: present
+
+      - name: install git
+        become: yes
+        package: 
+            name: git
+            state: present
+
+      - name: install curl
+        become: yes
+        package: 
+            name: curl
+            state: present
+
+      - name: install flatpak
+        become: yes
+        package: 
+            name: flatpak
+            state: present
+
+      - name: Add the flathub flatpak repository remote to the user installation
+        flatpak_remote:
+            name: flathub
+            state: present
+            flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo 
+
+      - name: Get vim-plug
+        remote_user: blyons
+        command: sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim' creates=/home/blyons/.local/share/nvim/site/autoload/plug.vim
+
+      - name: Get chezmoi
+        remote_user: blyons
+        command: sh -c 'curl -sfL https://git.io/chezmoi | sh' creates=/home/blyons/bin/chezmoi
+
+      - name: run chez-moi with personal dotfiles
+        remote_user: blyons
+        command: sh -c 'chezmoi init git@github.com:brettlyons/dotfiles.git && chezmoi update' creates=/home/blyons/.local/share/chezmoi
+
+      - name: Install Steam flatpak
+        flatpak:
+            name: com.valvesoftware.Steam 
+            state: present
+
+      - name: discover Glorious Eggroll Proton latest release filename
+        uri:
+          url: "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest"
+          return_content: true
+        register: json_response
+
+      - name: Download the glorious-eggroll-proton latest release
+        get_url: 
+          url: "{{ json_response.json.assets[0].browser_download_url }}"
+          dest: /tmp/geprotonlatest.tar.gz
+
+      - name: Make sure directories for fancy proton exist
+        file:
+          path: /home/blyons/.var/app/com.valvesoftware.Steam/data/Steam/compatibilitytools.d/
+          state: directory
+
+      - name: Install Glorious Eggroll proton latest release
+        remote_user: blyons
+        unarchive:
+            src: /tmp/geprotonlatest.tar.gz
+            dest: /home/blyons/.var/app/com.valvesoftware.Steam/data/Steam/compatibilitytools.d/
+
+      - name: Enable Night Light
+        dconf:
+            key: /org/gnome/settings-daemon/plugins/color/night-light-enabled
+            value: True
+
+      - name: Set Night Light Temperature
+        dconf:
+            key: /org/gnome/settings-daemon/plugins/color/night-light-temperature
+            value: uint32 3700
