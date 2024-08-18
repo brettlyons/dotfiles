@@ -12,7 +12,7 @@ if status is-interactive
 end
 
 # source /etc/profile with bash
-#if status is-login
-#    exec bash -c "test -e /etc/profile && source /etc/profile;\
-#    exec fish"
-#end
+if status is-login
+    exec bash -c "test -e /etc/profile && source /etc/profile;\
+    exec fish"
+end
