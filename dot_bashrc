@@ -30,3 +30,9 @@ unset rc
 #   shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=''
 #   exec fish $LOGIN_OPTION
 # fi
+#
+# ~/.bashrc
+export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+source <(carapace _carapace)
+
+eval "$(starship init bash)"
