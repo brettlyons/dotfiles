@@ -16,7 +16,6 @@ flatpak install flathub org.wezfurlong.wezterm &
 
 if [[ -e Brewfile ]]; then
   brew bundle install &
-  chezmoi init --apply brettlyons
 fi
 
 if [[ -e ../.config/nvim/ ]]; then
@@ -29,6 +28,10 @@ if [[ -e ../.config/nvim/ ]]; then
   mv ~/.cache/nvim{,.bak}
   # clone
   git clone https://github.com/LazyVim/starter ~/.config/nvim &
-  # fetch lazyvim packages
+  # fetch lazyvim packages and quit
   nvim --headless -c q!
 fi
+
+# Changes the state of .coonfig/nvim as well as other dotfiles, incl. wezterm
+# config.
+chezmoi init --apply brettlyons
