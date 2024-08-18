@@ -35,4 +35,6 @@ unset rc
 export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
 source <(carapace _carapace)
 
+eval "$(navi widget bash)"
+
 eval "$(starship init bash)"
