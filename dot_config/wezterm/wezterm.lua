@@ -1,8 +1,11 @@
 local wezterm = require("wezterm")
 local config = {}
 
+-- Spawn a fish shell in login mode
+config.default_prog = { "/usr/bin/zsh", "-l" }
+
 -- config.enable_wayland = true
-config.window_background_opacity = 1.0
+config.window_background_opacity = 0.6
 config.font = wezterm.font("IosevkaTerm Nerd Font")
 config.color_scheme = "Tokyo Night"
 config.tab_bar_at_bottom = true
