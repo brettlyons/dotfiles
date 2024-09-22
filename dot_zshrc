@@ -38,8 +38,8 @@ eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
 
 # FZF keybinds
-source /usr/share/fzf/key-bindings.zsh
-source /usr/share/fzf/completion.zsh
+source /usr/share/fzf/shell/key-bindings.zsh
+#source /usr/share/fzf/shell/completion.zsh
 
 
 ### bling.sh source start
