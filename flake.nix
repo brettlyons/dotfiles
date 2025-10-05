@@ -1,5 +1,5 @@
 {
-  description = "Security workstation configuration with Hyprland, Stylix, and tokyo-night theme";
+  description = "Workstation configuration with Hyprland, Stylix, and tokyo-night theme";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -18,23 +18,32 @@
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    
+    impermanence = {
+      url = "github:nix-community/impermanence";
+    };
+    
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, stylix, hyprland, ... }: 
+  outputs = { self, nixpkgs, home-manager, stylix, hyprland, impermanence, sops-nix, ... }: 
   let
     system = "x86_64-linux";
     
     # User configuration variables
     userConfig = {
-      full_name = "Security Analyst";
-      email_address = "analyst@localhost";
+      full_name = "Brett Lyons";
+      email_address = "blyons@fastmail.com";
       username = "blyons";
       theme = "tokyo-night";
     };
   in {
     nixosConfigurations = {
       # Replace with your hostname
-      security-ws = nixpkgs.lib.nixosSystem {
+      workstation = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit userConfig; };
         modules = [
@@ -42,9 +51,12 @@
           stylix.nixosModules.stylix
           hyprland.nixosModules.default
           home-manager.nixosModules.home-manager
+          impermanence.nixosModules.impermanence
+          sops-nix.nixosModules.sops
           
           # Custom modules
           ./password-manager.nix
+          ./system.nix
           
           # Main configuration
           ({ userConfig, ... }: {
