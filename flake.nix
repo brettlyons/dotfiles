@@ -63,6 +63,7 @@
           # Custom modules
           ./password-manager.nix
           ./system.nix
+          ./persistence.nix
           
           # Main configuration
           ({ userConfig, ... }: {
