@@ -5,10 +5,16 @@
     ./hardware-configuration.nix
   ];
 
-  # Bootloader configuration
+  # Bootloader configuration - Lanzaboote for Secure Boot
   boot = {
-    loader.systemd-boot.enable = true;
+    loader.systemd-boot.enable = lib.mkForce false; # Disabled for Lanzaboote
     loader.efi.canTouchEfiVariables = true;
+    
+    # Lanzaboote configuration
+    lanzaboote = {
+      enable = true;
+      pkiBundle = "/etc/secureboot";
+    };
     blacklistedKernelModules = [ "nouveau" ];
 
     # Impermanence root wiping
@@ -143,5 +149,5 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # System version
-  system.stateVersion = "24.05";
+  system.stateVersion = "25.05";
 }
