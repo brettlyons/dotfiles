@@ -27,11 +27,15 @@ Thumbs.db
 *.temp
 *.log
 
-# SOPS/Age keys (never commit private keys)
+# SOPS/Age keys and encrypted secrets (never commit)
 **/keys.txt
 **/key.txt
 **/*.key
 **/*.pem
+secrets.yaml
+secrets.yml
+**/secrets.yaml
+**/secrets.yml
 
 # Personal/local configuration overrides
 local.nix
