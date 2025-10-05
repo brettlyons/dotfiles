@@ -70,6 +70,13 @@
     curl
     sops
     age
+    
+    # USB and filesystem tools
+    ntfs3g          # NTFS support
+    exfat           # exFAT support
+    dosfstools      # FAT32 support
+    parted          # Partition management
+    lsof            # List open files (useful for umount)
   ];
 
   # Git global configuration
@@ -89,7 +96,7 @@
   users.users.${userConfig.username} = {
     isNormalUser = true;
     description = userConfig.full_name;
-    extraGroups = [ "networkmanager" "wheel" "wireshark" ];
+    extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" ];
     shell = pkgs.bash;
     hashedPasswordFile = config.sops.secrets.blyons_password.path;
     openssh.authorizedKeys.keys = [
@@ -108,6 +115,10 @@
     rtkit.enable = true;
     polkit.enable = true;
   };
+
+  # USB and removable media support
+  services.udisks2.enable = true;
+  services.gvfs.enable = true; # For file manager integration
 
   # Audio
   hardware.pulseaudio.enable = false;
