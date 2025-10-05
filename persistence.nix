@@ -61,9 +61,15 @@
         ".config"
         ".gnupg"
         ".ssh"
-        ".mozilla"
         ".claude"
         ".nixops"
+        
+        # Browser data (profiles, logins, bookmarks)
+        ".mozilla"
+        
+        # Application data
+        ".BurpSuite"
+        ".java"
         
         # User data directories
         "Documents"
