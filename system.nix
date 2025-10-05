@@ -49,6 +49,7 @@
     description = userConfig.full_name;
     extraGroups = [ "networkmanager" "wheel" "wireshark" ];
     shell = pkgs.bash;
+    hashedPasswordFile = config.sops.secrets.blyons_password.path;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICNyK0e6k0fOGbwGWi3Yg03Cg31OPgkIjA4ZKdc+rLIy blyons@fastmail.com"
     ];

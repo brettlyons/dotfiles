@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, userConfig ? {}, ... }:
 
 with lib;
 
@@ -14,8 +14,14 @@ in
 
     provider = mkOption {
       type = types.enum [ "1password" "bitwarden" ];
-      default = "1password";
+      default = "bitwarden";
       description = "Which password manager to use";
+    };
+
+    email = mkOption {
+      type = types.str;
+      default = userConfig.email_address or "";
+      description = "Email address for password manager account";
     };
 
     gui = mkOption {
@@ -53,7 +59,7 @@ in
       # Optional: Configure rbw for CLI usage
       environment.etc."rbw/config.json" = mkIf cfg.cli {
         text = builtins.toJSON {
-          email = ""; # User should set this
+          email = cfg.email;
           base_url = "https://vault.bitwarden.com/";
           identity_url = "https://identity.bitwarden.com/";
           notifications_url = "https://notifications.bitwarden.com/";

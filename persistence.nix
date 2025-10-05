@@ -3,10 +3,15 @@
 {
   # SOPS-nix configuration to avoid timing issues with impermanence
   sops = {
+    defaultSopsFile = ./secrets.yaml;
     age.keyFile = "/persist/system/etc/nixos/secrets/keys.txt";
     # Disable SSH key paths to avoid timing issues with impermanence
     age.sshKeyPaths = [];
     gnupg.sshKeyPaths = [];
+    
+    secrets.blyons_password = {
+      neededForUsers = true;
+    };
   };
 
   # Impermanence configuration - matches current system setup  
