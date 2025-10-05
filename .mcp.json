@@ -1,0 +1,1 @@
+{"mcpServers":{"ledger":{"args":["run","-v","/home/blyons/finances/main.ledger:/main.ledger","-e","LEDGER_FILE=/main.ledger","-i","--rm","minhyeoky/mcp-ledger"],"command":"docker"},"nixos":{"args":["run","github:utensils/mcp-nixos","--"],"command":"nix"}}}
