@@ -27,9 +27,14 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v0.4.2";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, stylix, hyprland, impermanence, sops-nix, ... }: 
+  outputs = { self, nixpkgs, home-manager, stylix, hyprland, impermanence, sops-nix, lanzaboote, ... }: 
   let
     system = "x86_64-linux";
     
@@ -53,6 +58,7 @@
           home-manager.nixosModules.home-manager
           impermanence.nixosModules.impermanence
           sops-nix.nixosModules.sops
+          lanzaboote.nixosModules.lanzaboote
           
           # Custom modules
           ./password-manager.nix
