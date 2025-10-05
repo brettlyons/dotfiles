@@ -28,6 +28,8 @@ Thumbs.db
 *.log
 
 # SOPS/Age keys and encrypted secrets (never commit)
+keys/
+**/keys/
 **/keys.txt
 **/key.txt
 **/*.key
