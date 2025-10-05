@@ -49,6 +49,9 @@
     description = userConfig.full_name;
     extraGroups = [ "networkmanager" "wheel" "wireshark" ];
     shell = pkgs.bash;
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICNyK0e6k0fOGbwGWi3Yg03Cg31OPgkIjA4ZKdc+rLIy blyons@fastmail.com"
+    ];
   };
 
   # Networking
@@ -70,6 +73,22 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+  };
+
+  # OpenSSH server
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+      X11Forwarding = false;
+    };
+  };
+
+  # Tailscale VPN
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "client";
   };
 
   # Display manager - greetd with tuigreet

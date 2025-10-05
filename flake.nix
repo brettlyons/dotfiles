@@ -47,8 +47,7 @@
     };
   in {
     nixosConfigurations = {
-      # Replace with your hostname
-      workstation = nixpkgs.lib.nixosSystem {
+      bamboo = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit userConfig; };
         modules = [
