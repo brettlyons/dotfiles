@@ -15,18 +15,13 @@
     };
     blacklistedKernelModules = [ "nouveau" ];
 
-    # Debug and logging configuration for troubleshooting
+    # Kernel parameters
     kernelParams = [
-      "systemd.log_level=debug"
-      "systemd.log_target=kmsg"
-      "log_buf_len=1M"
-      "printk.devkmsg=on"
-      "systemd.journald.forward_to_console=1"
       "console=tty0"
     ];
 
     # Enable persistent journald logging
-    systemd.services.systemd-journald.environment.SYSTEMD_LOG_LEVEL = "debug";
+    # systemd.services.systemd-journald.environment.SYSTEMD_LOG_LEVEL = "debug";
 
     # LUKS encryption support
     initrd.luks.devices."crypted" = {
@@ -119,7 +114,7 @@
   users.users.${userConfig.username} = {
     isNormalUser = true;
     description = userConfig.full_name;
-    extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" ];
+    extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" "docker" ];
     shell = pkgs.bash;
     hashedPasswordFile = config.sops.secrets.blyons_password.path;
     openssh.authorizedKeys.keys = [
@@ -134,12 +129,17 @@
     firewall.enable = true;
   };
 
+  time.timeZone = "America/Denver";
+
   # Security
   security = {
     rtkit.enable = true;
     polkit.enable = true;
     sudo.wheelNeedsPassword = false;
   };
+
+  # Docker
+  virtualisation.docker.enable = true;
 
   # USB and removable media support
   services.udisks2.enable = true;
@@ -170,46 +170,59 @@
     useRoutingFeatures = "client";
   };
 
+  # Hyprland
+  programs.hyprland = {
+    enable = true;
+    withUWSM = true;
+    xwayland.enable = true;
+  };
+
   # Display manager - greetd with tuigreet
   services.greetd = {
     enable = true;
     settings = {
       default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd Hyprland";
+        # command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd Hyprland";
         user = "greeter";
       };
     };
   };
 
+  programs.regreet = {
+    enable = true;
+    # theme.package = pkgs.tokyonight-gtk-theme;
+    # theme.name = "Tokyonight-dark";
+  };
+
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # Enhanced logging and debugging for boot issues
-  services.journald = {
-    extraConfig = ''
-      Storage=persistent
-      Compress=yes
-      SystemMaxUse=1G
-      SystemMaxFileSize=100M
-      ForwardToConsole=yes
-      MaxLevelConsole=debug
-    '';
-  };
+  # # Enhanced logging and debugging for boot issues
+  # services.journald = {
+  #   extraConfig = ''
+  #     Storage=persistent
+  #     Compress=yes
+  #     SystemMaxUse=1G
+  #     SystemMaxFileSize=100M
+  #     ForwardToConsole=yes
+  #     MaxLevelConsole=debug
+  #   '';
+  # };
 
-  # Emergency shell access for boot failures
-  systemd.services."emergency-shell" = {
-    enable = true;
-    serviceConfig = {
-      ExecStart = "/bin/sh";
-      Type = "idle";
-      StandardInput = "tty-force";
-      StandardOutput = "inherit";
-      StandardError = "inherit";
-      KillMode = "process";
-      IgnoreSIGPIPE = false;
-      SendSIGHUP = true;
-    };
-  };
+  # # Emergency shell access for boot failures
+  # systemd.services."emergency-shell" = {
+  #   enable = true;
+  #   serviceConfig = {
+  #     ExecStart = "/bin/sh";
+  #     Type = "idle";
+  #     StandardInput = "tty-force";
+  #     StandardOutput = "inherit";
+  #     StandardError = "inherit";
+  #     KillMode = "process";
+  #     IgnoreSIGPIPE = false;
+  #     SendSIGHUP = true;
+  #   };
+  # };
 
   # System version
   system.stateVersion = "25.05";

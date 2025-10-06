@@ -72,8 +72,8 @@
             # Allow unfree packages
             nixpkgs.config.allowUnfree = true;
 
-            # Enable Hyprland
-            programs.hyprland.enable = true;
+            # # Enable Hyprland
+            # programs.hyprland.enable = true;
 
             # Password manager
             services.passwordManager.enable = true;
@@ -81,7 +81,10 @@
             # Stylix theming
             stylix = {
               enable = true;
-              base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+              polarity = "dark";
+              image = ./fractals_designs_4k.jpg;
+              base16Scheme = "${pkgs.base16-schemes}/share/themes/onedark-dark.yaml";
+              # base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
               fonts = {
                 monospace = {
                   package = pkgs.nerd-fonts.caskaydia-mono;
