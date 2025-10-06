@@ -98,13 +98,8 @@
     lsof            # List open files (useful for umount)
     usbutils        # lsusb and USB device info
 
-    # Build tools for scarlett2 firmware updater
-    gnumake
-    pkg-config
-    alsa-lib
-    alsa-lib.dev
-    openssl
-    openssl.dev
+    # Focusrite Scarlett firmware updater
+    scarlett2
   ];
 
   # Git global configuration
