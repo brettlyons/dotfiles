@@ -1,15 +1,13 @@
 { config, lib, pkgs, userConfig, ... }:
 
 {
-  imports = [
-    ./hardware-configuration.nix
-  ];
+  # No imports here - hardware config handled in flake.nix
 
   # Bootloader configuration - Lanzaboote for Secure Boot
   boot = {
     loader.systemd-boot.enable = lib.mkForce false; # Disabled for Lanzaboote
     loader.efi.canTouchEfiVariables = true;
-    
+
     # Lanzaboote configuration
     lanzaboote = {
       enable = true;
@@ -17,10 +15,31 @@
     };
     blacklistedKernelModules = [ "nouveau" ];
 
+    # Debug and logging configuration for troubleshooting
+    kernelParams = [
+      "systemd.log_level=debug"
+      "systemd.log_target=kmsg"
+      "log_buf_len=1M"
+      "printk.devkmsg=on"
+      "systemd.journald.forward_to_console=1"
+      "console=tty0"
+    ];
+
+    # Enable persistent journald logging
+    systemd.services.systemd-journald.environment.SYSTEMD_LOG_LEVEL = "debug";
+
+    # LUKS encryption support
+    initrd.luks.devices."crypted" = {
+      device = "/dev/disk/by-uuid/09e74f96-8cc7-490a-a254-84f89f320795";
+    };
+
+    # Additional kernel modules for LVM/LUKS/BTRFS
+    initrd.kernelModules = [ "dm-mod" "dm-crypt" "dm-snapshot" ];
+
     # Impermanence root wiping
     initrd.postDeviceCommands = lib.mkAfter ''
       mkdir /btrfs_tmp
-      mount /dev/disk/by-uuid/c3907d0b-d76d-43e3-9b82-bc6dcee0c1bc /btrfs_tmp
+      mount /dev/root_vg/root /btrfs_tmp
       if [[ -e /btrfs_tmp/root ]]; then
           mkdir -p /btrfs_tmp/old_roots
           timestamp=$(date --date="@$(stat -c %Y /btrfs_tmp/root)" "+%Y-%m-%-d_%H:%M:%S")
@@ -46,12 +65,12 @@
   # System fonts
   fonts = {
     packages = with pkgs; [
-      (nerdfonts.override { fonts = [ "CascadiaCode" ]; })
+      nerd-fonts.caskaydia-mono
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-emoji
     ];
-    
+
     fontconfig = {
       defaultFonts = {
         monospace = [ "CaskaydiaMono Nerd Font" ];
@@ -70,7 +89,7 @@
     curl
     sops
     age
-    
+
     # USB and filesystem tools
     ntfs3g          # NTFS support
     exfat           # exFAT support
@@ -106,6 +125,7 @@
 
   # Networking
   networking = {
+    hostName = "bamboo";
     networkmanager.enable = true;
     firewall.enable = true;
   };
@@ -121,7 +141,7 @@
   services.gvfs.enable = true; # For file manager integration
 
   # Audio
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -150,7 +170,7 @@
     enable = true;
     settings = {
       default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd Hyprland";
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd Hyprland";
         user = "greeter";
       };
     };
@@ -158,6 +178,33 @@
 
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # Enhanced logging and debugging for boot issues
+  services.journald = {
+    extraConfig = ''
+      Storage=persistent
+      Compress=yes
+      SystemMaxUse=1G
+      SystemMaxFileSize=100M
+      ForwardToConsole=yes
+      MaxLevelConsole=debug
+    '';
+  };
+
+  # Emergency shell access for boot failures
+  systemd.services."emergency-shell" = {
+    enable = true;
+    serviceConfig = {
+      ExecStart = "/bin/sh";
+      Type = "idle";
+      StandardInput = "tty-force";
+      StandardOutput = "inherit";
+      StandardError = "inherit";
+      KillMode = "process";
+      IgnoreSIGPIPE = false;
+      SendSIGHUP = true;
+    };
+  };
 
   # System version
   system.stateVersion = "25.05";
