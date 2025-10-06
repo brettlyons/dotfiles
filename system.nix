@@ -114,7 +114,7 @@
   users.users.${userConfig.username} = {
     isNormalUser = true;
     description = userConfig.full_name;
-    extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" "docker" "audio" ];
     shell = pkgs.bash;
     hashedPasswordFile = config.sops.secrets.blyons_password.path;
     openssh.authorizedKeys.keys = [
@@ -153,6 +153,9 @@
     alsa.support32Bit = true;
     pulse.enable = true;
   };
+
+  # Power management
+  services.power-profiles-daemon.enable = true;
 
   # OpenSSH server
   services.openssh = {

@@ -43,7 +43,6 @@
       full_name = "Brett Lyons";
       email_address = "blyons@fastmail.com";
       username = "blyons";
-      theme = "tokyo-night";
     };
   in {
     nixosConfigurations = {
