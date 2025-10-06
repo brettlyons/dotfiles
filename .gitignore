@@ -44,9 +44,6 @@ local.nix
 personal.nix
 secrets.nix
 
-# Hardware-specific configs (if you decide to keep them separate)
-hardware-configuration.nix
-
 # Backup files
 *.bak
 *.backup

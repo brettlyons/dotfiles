@@ -96,6 +96,13 @@
     dosfstools      # FAT32 support
     parted          # Partition management
     lsof            # List open files (useful for umount)
+    usbutils        # lsusb and USB device info
+
+    # Build tools for scarlett2 firmware updater
+    gnumake
+    pkg-config
+    alsa-lib
+    openssl
   ];
 
   # Git global configuration
@@ -134,6 +141,7 @@
   security = {
     rtkit.enable = true;
     polkit.enable = true;
+    sudo.wheelNeedsPassword = false;
   };
 
   # USB and removable media support
