@@ -102,7 +102,9 @@
     gnumake
     pkg-config
     alsa-lib
+    alsa-lib.dev
     openssl
+    openssl.dev
   ];
 
   # Git global configuration
