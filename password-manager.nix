@@ -54,7 +54,7 @@ in
     (mkIf (cfg.provider == "bitwarden") {
       environment.systemPackages = with pkgs; 
         (optional cfg.cli rbw) ++
-        (optional cfg.gui goldwarden);
+        (optional cfg.gui bitwarden);
 
       # Optional: Configure rbw for CLI usage
       environment.etc."rbw/config.json" = mkIf cfg.cli {

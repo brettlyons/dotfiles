@@ -52,7 +52,7 @@
       # Keyboard layout
       input = {
         kb_layout = "us";
-        kb_variant = "colemak_dh";
+        # kb_variant = "colemak_dh";
         follow_mouse = 1;
         touchpad = {
           natural_scroll = false;
@@ -98,18 +98,9 @@
     };
   };
 
-  # Terminal (font handled by Stylix, but we can set the family)
+  # Terminal (font handled by Stylix)
   programs.alacritty = {
     enable = true;
-    settings = {
-      font = {
-        normal = {
-          family = "CaskaydiaMono Nerd Font";
-          style = "Regular";
-        };
-        size = 12;
-      };
-    };
   };
 
   # Let Home Manager manage itself
