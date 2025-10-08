@@ -6,6 +6,12 @@
     username = userConfig.username;
     homeDirectory = "/home/${userConfig.username}";
     stateVersion = "25.05";
+
+    # Ensure screenshot and recording directories exist
+    file = {
+      "Pictures/screenshots/.keep".text = "";
+      "Videos/recordings/.keep".text = "";
+    };
   };
 
   # Git configuration using userConfig
@@ -32,6 +38,22 @@
     burpsuite
     caido
 
+    # Forensics & analysis tools
+    binutils     # strings, objdump, etc.
+    file         # File type identifier
+    exiftool     # EXIF metadata tool
+    cyberchef    # Data analysis Swiss Army knife
+    unzip        # Archive extraction
+    p7zip        # 7z archive support
+    volatility3  # Memory forensics framework
+    swayimg      # Image viewer for Wayland/Hyprland
+    sqlite       # SQLite database CLI
+    john         # John the Ripper password cracker
+    hashcat      # GPU-accelerated password cracker
+    sleuthkit    # Disk forensics toolkit
+    foremost     # File carving tool
+    bulk_extractor  # Extract information from disk images
+
     # Development
     vscode
     firefox
@@ -49,6 +71,14 @@
     hyprlock     # Screen locker
     qalculate-gtk  # Calculator (qalc CLI for Walker)
     libnotify    # Desktop notifications (notify-send)
+
+    # Screenshot & recording tools
+    grim         # Screenshot utility for Wayland
+    slurp        # Region selector for Wayland
+    wf-recorder  # Screen recording for wlroots compositors
+
+    # Container tools
+    distrobox    # Container-based Linux distributions
 
     # Editor
     helix
@@ -119,12 +149,26 @@
         "$mod, P, pseudo"
         "$mod, J, togglesplit"
         "$mod, L, exec, hyprlock"
+        "$mod, F, fullscreen"
 
         # Move focus (Colemak-DH: m=left, n=down, e=up, i=right)
         "$mod, m, movefocus, l"
         "$mod, i, movefocus, r"
         "$mod, e, movefocus, u"
         "$mod, n, movefocus, d"
+
+        # Scratchpad
+        "$mod, S, togglespecialworkspace, scratchpad"
+        "$mod SHIFT, S, movetoworkspace, special:scratchpad"
+
+        # Screenshots & Recording
+        ", Print, exec, grim -g \"$(slurp)\" ~/Pictures/screenshots/$(date +%Y%m%d_%H%M%S).png"
+        "SHIFT, Print, exec, grim -g \"$(hyprctl activewindow -j | jq -r '\"\\(.at[0]),\\(.at[1]) \\(.size[0])x\\(.size[1])\"')\" ~/Pictures/screenshots/$(date +%Y%m%d_%H%M%S).png"
+        "ALT, Print, exec, killall -s SIGINT wf-recorder || wf-recorder -g \"$(slurp)\" -f ~/Videos/recordings/$(date +%Y%m%d_%H%M%S).mp4"
+
+        # Notifications
+        "$mod, comma, exec, makoctl dismiss"
+        "$mod SHIFT, comma, exec, makoctl dismiss --all"
 
         # Switch to workspace
         "$mod, 1, workspace, 1"
@@ -150,6 +194,12 @@
         "$mod SHIFT, 9, movetoworkspace, 9"
         "$mod SHIFT, 0, movetoworkspace, 10"
       ];
+
+      # Mouse bindings
+      bindm = [
+        "$mod, mouse:272, movewindow"      # SUPER + left-click to move
+        "$mod, mouse:273, resizewindow"    # SUPER + right-click to resize
+      ];
       
       general = {
         gaps_in = 5;
@@ -157,7 +207,7 @@
         border_size = 2;
         layout = "dwindle";
       };
-      
+
       decoration = {
         rounding = 8;
         blur = {
@@ -165,21 +215,46 @@
           size = 8;
           passes = 1;
         };
+        active_opacity = 1.0;
+        inactive_opacity = 0.85;
         # drop_shadow = true;
         # shadow_range = 4;
         # shadow_render_power = 3;
       };
+
+      # Workspace rules
+      workspace = [
+        "special:scratchpad, on-created-empty:alacritty"
+      ];
+
+      # Window rules for scratchpad
+      windowrulev2 = [
+        "float, onworkspace:special:scratchpad"
+      ];
     };
   };
 
   # Bash shell
   programs.bash = {
     enable = true;
+    shellAliases = {
+      kali = "distrobox enter kali --root";
+    };
+  };
+
+  # direnv - automatic environment switching
+  programs.direnv = {
+    enable = true;
+    enableBashIntegration = true;
+    nix-direnv.enable = true;  # Better Nix integration with caching
   };
 
   # Terminal (font handled by Stylix)
   programs.alacritty = {
     enable = true;
+    settings = {
+      window.opacity = lib.mkForce 0.99;  # Enable transparency support for Hyprland
+    };
   };
 
   # eza - modern ls replacement with icons
@@ -271,10 +346,10 @@
 
         "custom/hypridle" = {
           format = "{}";
-          exec = "pidof hypridle > /dev/null && echo '󰾪' || echo '󰅶'";
+          exec = "systemctl --user is-active hypridle-inhibit.service &>/dev/null && echo '󰅶' || echo '󰾪'";
           interval = 2;
           signal = 8;
-          on-click = "(pkill -x hypridle && notify-send 'Hypridle' 'Disabled') || (${pkgs.hypridle}/bin/hypridle & notify-send 'Hypridle' 'Enabled'); pkill -RTMIN+8 waybar";
+          on-click = "systemctl --user is-active hypridle-inhibit.service &>/dev/null && (systemctl --user stop hypridle-inhibit.service && notify-send 'Hypridle' 'Enabled') || (systemd-run --user --unit=hypridle-inhibit.service systemd-inhibit --what=idle --who=waybar --why='User disabled idle' --mode=block sleep infinity && notify-send 'Hypridle' 'Disabled'); pkill -RTMIN+8 waybar";
           tooltip-format = "Click to toggle idle timeout";
         };
 

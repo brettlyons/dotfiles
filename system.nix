@@ -26,6 +26,7 @@
     # LUKS encryption support
     initrd.luks.devices."crypted" = {
       device = "/dev/disk/by-uuid/09e74f96-8cc7-490a-a254-84f89f320795";
+      crypttabExtraOpts = [ "tpm2-device=auto" ];
     };
 
     # Additional kernel modules for LVM/LUKS/BTRFS
@@ -114,7 +115,7 @@
   users.users.${userConfig.username} = {
     isNormalUser = true;
     description = userConfig.full_name;
-    extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" "docker" "audio" ];
+    extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" "docker" "podman" "audio" ];
     shell = pkgs.bash;
     hashedPasswordFile = config.sops.secrets.blyons_password.path;
     openssh.authorizedKeys.keys = [
@@ -140,6 +141,35 @@
 
   # Docker
   virtualisation.docker.enable = true;
+
+  # Podman - for Distrobox
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = false;  # Keep docker separate
+    defaultNetwork.settings.dns_enabled = true;
+  };
+
+  # Kali Linux distrobox setup - runs once to create container
+  system.activationScripts.kaliDistrobox = lib.stringAfter [ "users" ] ''
+    # Check if kali distrobox already exists
+    if ! ${pkgs.podman}/bin/podman container exists kali 2>/dev/null; then
+      echo "Creating Kali Linux distrobox container..."
+      ${pkgs.distrobox}/bin/distrobox create \
+        --name kali \
+        --image docker.io/kalilinux/kali-rolling \
+        --root \
+        --additional-flags "--cap-add=NET_RAW --cap-add=NET_ADMIN" \
+        --init-hooks "apt update && apt full-upgrade -y && apt install -y kali-linux-headless" \
+        --yes || true
+    fi
+  '';
+
+  # ZRAM - Compressed RAM swap
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";  # Good compression + performance balance
+    memoryPercent = 50;  # Use up to 50% of RAM for compressed swap
+  };
 
   # USB and removable media support
   services.udisks2.enable = true;
@@ -197,8 +227,27 @@
     # theme.name = "Tokyonight-dark";
   };
 
-  # Enable flakes
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  # Enable flakes and build optimizations
+  nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
+    max-jobs = "auto";  # Build multiple packages in parallel
+    cores = 0;          # Use all CPU cores per build (0 = all)
+  };
+
+  # Automatic garbage collection
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";  # Run every Sunday at 03:00
+    options = "--delete-older-than 30d";  # Delete unreferenced paths older than 30 days
+  };
+
+  # Automatic system updates
+  system.autoUpgrade = {
+    enable = true;
+    flake = "/home/blyons/workspace/dotfiles#bamboo";
+    dates = "04:00";  # Run daily at 4 AM
+    allowReboot = false;  # Don't automatically reboot
+  };
 
   # # Enhanced logging and debugging for boot issues
   # services.journald = {

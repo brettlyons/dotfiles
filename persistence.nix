@@ -47,7 +47,7 @@
       "/var/lib/docker"
       "/var/lib/libvirt"
       "/var/lib/postgresql"
-      
+
       # User home directory
       "/home/${userConfig.username}"
     ];
