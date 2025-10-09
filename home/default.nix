@@ -11,6 +11,12 @@
     file = {
       "Pictures/screenshots/.keep".text = "";
       "Videos/recordings/.keep".text = "";
+
+      # helix-everywhere script
+      ".local/bin/helix-everywhere" = {
+        source = ../scripts/helix-everywhere;
+        executable = true;
+      };
     };
   };
 
@@ -25,10 +31,53 @@
     };
   };
 
+  # EditorConfig - universal editor settings
+  editorconfig = {
+    enable = true;
+    settings = {
+      "*" = {
+        charset = "utf-8";
+        end_of_line = "lf";
+        trim_trailing_whitespace = true;
+        insert_final_newline = true;
+        indent_style = "space";
+        indent_size = 2;
+      };
+      "*.{py}" = {
+        indent_size = 4;
+      };
+      "*.{go,c,cpp,h,hpp,rs}" = {
+        indent_size = 4;
+      };
+      "*.{md,txt}" = {
+        trim_trailing_whitespace = false;
+      };
+      "Makefile" = {
+        indent_style = "tab";
+      };
+    };
+  };
+
+  # Emacs configuration for doom-emacs
+  programs.emacs = {
+    enable = true;
+    package = pkgs.emacs-pgtk;
+    extraPackages = epkgs: with epkgs; [
+      vterm
+      # mu4e  # Commented out due to build failure
+    ];
+  };
+
   # Packages
   home.packages = with pkgs; [
     # Communication
     zoom-us
+    slack
+    webcord
+
+    # Sandboxing tools
+    firejail
+    bubblewrap
 
     # Security tools
     wireshark
@@ -57,6 +106,7 @@
     # Development
     vscode
     firefox
+    tridactyl-native  # Native messenger for Tridactyl Firefox extension
     claude-code
 
     # System tools
@@ -66,6 +116,9 @@
     curl
     wget
     jq
+    ripgrep      # Fast grep with PCRE2 support
+    fd           # Fast find alternative
+    wtype        # Wayland text typing tool (xdotool for Wayland)
     pwvucontrol  # PipeWire audio device manager
     wlogout      # Logout menu
     hyprlock     # Screen locker
@@ -114,6 +167,9 @@
   # Hyprland configuration (colors handled by Stylix)
   wayland.windowManager.hyprland = {
     enable = true;
+    plugins = [
+      pkgs.hyprlandPlugins.hypr-dynamic-cursors
+    ];
     settings = {
       "$mod" = "SUPER";
 
@@ -127,6 +183,19 @@
         vrr = 1;     # Adaptive sync
       };
 
+      # Dynamic cursor plugin configuration
+      "plugin:dynamic-cursors" = {
+        enabled = true;
+        mode = "rotate";  # Options: none, tilt, rotate, stretch
+
+        # Shake to find configuration
+        shake = {
+          enabled = true;
+          threshold = 4.0;  # Sensitivity
+          factor = 1.5;     # How much bigger the cursor gets
+        };
+      };
+
       # Keyboard layout
       input = {
         kb_layout = "us";
@@ -136,6 +205,7 @@
           natural_scroll = false;
         };
         sensitivity = 0;
+        accel_profile = "adaptive";  # Options: adaptive, flat
       };
       
       bind = [
@@ -169,6 +239,9 @@
         # Notifications
         "$mod, comma, exec, makoctl dismiss"
         "$mod SHIFT, comma, exec, makoctl dismiss --all"
+
+        # Helix Everywhere - edit text from anywhere
+        "$mod SHIFT, H, exec, $HOME/.local/bin/helix-everywhere"
 
         # Switch to workspace
         "$mod, 1, workspace, 1"
@@ -230,6 +303,9 @@
       # Window rules for scratchpad
       windowrulev2 = [
         "float, onworkspace:special:scratchpad"
+        "float, class:^(helix-everywhere)$"
+        "size 80% 80%, class:^(helix-everywhere)$"
+        "center, class:^(helix-everywhere)$"
       ];
     };
   };

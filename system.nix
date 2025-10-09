@@ -210,6 +210,21 @@
     xwayland.enable = true;
   };
 
+  # Firejail sandboxing
+  programs.firejail = {
+    enable = true;
+    wrappedBinaries = {
+      slack = {
+        executable = "${pkgs.slack}/bin/slack";
+        profile = "${pkgs.firejail}/etc/firejail/slack.profile";
+      };
+      webcord = {
+        executable = "${pkgs.webcord}/bin/webcord";
+        profile = "${pkgs.firejail}/etc/firejail/discord.profile";
+      };
+    };
+  };
+
   # Display manager - greetd with tuigreet
   services.greetd = {
     enable = true;

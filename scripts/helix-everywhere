@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# helix-everywhere: Edit text in Helix from anywhere on Wayland
+# Usage: Bind this script to a hotkey in Hyprland
+
+TMPFILE=$(mktemp /tmp/helix-everywhere.XXXXXX)
+
+# Get the currently focused window before opening editor
+FOCUSED_ADDRESS=$(hyprctl activewindow -j | jq -r '.address')
+
+# Open Alacritty with Helix in a floating window in the background
+# The --class flag sets a unique class name for window rules
+alacritty --class helix-everywhere --title "Helix Everywhere" \
+    -e hx "$TMPFILE" &
+
+ALACRITTY_PID=$!
+
+# Poll hyprctl IPC until helix-everywhere window appears
+while ! hyprctl clients -j | jq -e '.[] | select(.class == "helix-everywhere")' > /dev/null 2>&1; do
+    sleep 0.05
+done
+
+# Send "i" to enter insert mode
+wtype i
+
+# Wait for the editor to close
+wait $ALACRITTY_PID
+
+# After Helix closes, type the content back using wtype
+if [ -s "$TMPFILE" ]; then
+    # Return focus to original window
+    if [ -n "$FOCUSED_ADDRESS" ] && [ "$FOCUSED_ADDRESS" != "null" ]; then
+        hyprctl dispatch focuswindow "address:$FOCUSED_ADDRESS"
+
+        # Poll hyprctl IPC until focus returns to original window
+        while [ "$(hyprctl activewindow -j | jq -r '.address')" != "$FOCUSED_ADDRESS" ]; do
+            sleep 0.05
+        done
+    fi
+
+    # Type the content (wtype expects arguments, not stdin)
+    wtype "$(cat "$TMPFILE")"
+fi
+
+# Clean up
+rm -f "$TMPFILE"
