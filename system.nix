@@ -3,25 +3,46 @@
 {
   # No imports here - hardware config handled in flake.nix
 
-  # Bootloader configuration - Lanzaboote for Secure Boot
+  # Bootloader configuration - Limine for Secure Boot
   boot = {
-    loader.systemd-boot.enable = lib.mkForce false; # Disabled for Lanzaboote
+    # Liquorix kernel for desktop performance
+    kernelPackages = pkgs.linuxKernel.packages.linux_lqx;
+
     loader.efi.canTouchEfiVariables = true;
 
-    # Lanzaboote configuration
-    lanzaboote = {
+    # Limine bootloader configuration
+    loader.limine = {
       enable = true;
-      pkiBundle = "/etc/secureboot";
+      efiSupport = true;
+      biosSupport = false;
+      secureBoot.enable = true;
     };
+
+    # Fast boot - minimal bootloader timeout
+    loader.timeout = 0;
+
     blacklistedKernelModules = [ "nouveau" ];
 
     # Kernel parameters
     kernelParams = [
-      "console=tty0"
+      "quiet"                  # Minimal kernel messages
+      "splash"                 # Show Plymouth splash screen
+      "udev.log_level=3"       # Reduce udev logging
+      "vt.global_cursor_default=0"  # Hide cursor
+      "rd.systemd.show_status=false"  # Hide systemd status during initrd
+      "rd.udev.log_level=3"            # Quiet udev in initrd
+      "plymouth.ignore-serial-consoles" # Prevent Plymouth from fighting with serial
     ];
 
-    # Enable persistent journald logging
-    # systemd.services.systemd-journald.environment.SYSTEMD_LOG_LEVEL = "debug";
+    # Silent boot configuration
+    consoleLogLevel = 0;
+    initrd.verbose = false;
+
+    # Plymouth boot splash
+    plymouth.enable = true;
+
+    # tmpfs for /tmp - faster temporary files
+    tmp.useTmpfs = true;
 
     # LUKS encryption support
     initrd.luks.devices."crypted" = {
@@ -32,32 +53,60 @@
     # Additional kernel modules for LVM/LUKS/BTRFS
     initrd.kernelModules = [ "dm-mod" "dm-crypt" "dm-snapshot" ];
 
-    # Impermanence root wiping
-    initrd.postDeviceCommands = lib.mkAfter ''
-      mkdir /btrfs_tmp
-      mount /dev/root_vg/root /btrfs_tmp
-      if [[ -e /btrfs_tmp/root ]]; then
-          mkdir -p /btrfs_tmp/old_roots
-          timestamp=$(date --date="@$(stat -c %Y /btrfs_tmp/root)" "+%Y-%m-%-d_%H:%M:%S")
-          mv /btrfs_tmp/root "/btrfs_tmp/old_roots/$timestamp"
-      fi
+    # TPM2 support for auto-unlock
+    initrd.systemd.enable = true;
+    initrd.systemd.tpm2.enable = true;
 
-      delete_subvolume_recursively() {
-          IFS=$'\n'
-          for i in $(btrfs subvolume list -o "$1" | cut -f 9- -d ' '); do
-              delete_subvolume_recursively "/btrfs_tmp/$i"
-          done
-          btrfs subvolume delete "$1"
-      }
+    # Impermanence root wiping (systemd-based for stage 1)
+    initrd.systemd.services.rollback = {
+      description = "Rollback BTRFS root subvolume to a pristine state";
+      wantedBy = [ "initrd.target" ];
+      after = [ "systemd-cryptsetup@crypted.service" ];
+      before = [ "sysroot.mount" ];
+      unitConfig.DefaultDependencies = "no";
+      serviceConfig.Type = "oneshot";
+      script = ''
+        mkdir -p /mnt
+        mount -o subvol=/ /dev/mapper/root_vg-root /mnt
 
-      for i in $(find /btrfs_tmp/old_roots/ -maxdepth 1 -mtime +30); do
-          delete_subvolume_recursively "$i"
-      done
+        # Move current root to old_roots with timestamp
+        if [[ -e /mnt/root ]]; then
+            mkdir -p /mnt/old_roots
+            timestamp=$(date --date="@$(stat -c %Y /mnt/root)" "+%Y-%m-%d_%H:%M:%S")
+            mv /mnt/root "/mnt/old_roots/$timestamp"
+        fi
 
-      btrfs subvolume create /btrfs_tmp/root
-      umount /btrfs_tmp
-    '';
+        # Delete old root subvolumes (older than 30 days)
+        delete_subvolume_recursively() {
+            IFS=$'\n'
+            for i in $(btrfs subvolume list -o "$1" | cut -f 9- -d ' '); do
+                delete_subvolume_recursively "/mnt/$i"
+            done
+            btrfs subvolume delete "$1"
+        }
+
+        for i in $(find /mnt/old_roots/ -maxdepth 1 -mtime +30); do
+            delete_subvolume_recursively "$i"
+        done
+
+        # Create fresh root subvolume
+        btrfs subvolume create /mnt/root
+        umount /mnt
+      '';
+    };
   };
+
+  # Hardware graphics acceleration
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver  # VA-API for Intel GPUs (Broadwell+)
+    ];
+  };
+
+  # ZSA keyboard support (ErgoDox EZ, Moonlander, etc.)
+  hardware.keyboard.zsa.enable = true;
+
   # System fonts
   fonts = {
     packages = with pkgs; [
@@ -85,6 +134,7 @@
     curl
     sops
     age
+    sbctl           # Secure Boot key management
 
     # USB and filesystem tools
     ntfs3g          # NTFS support
@@ -93,6 +143,7 @@
     parted          # Partition management
     lsof            # List open files (useful for umount)
     usbutils        # lsusb and USB device info
+    usbguard-notifier  # GUI notifications for USB device authorization
 
     # Focusrite Scarlett firmware updater
     scarlett2
@@ -116,18 +167,26 @@
     isNormalUser = true;
     description = userConfig.full_name;
     extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" "docker" "podman" "audio" ];
-    shell = pkgs.bash;
+    shell = pkgs.zsh;
     hashedPasswordFile = config.sops.secrets.blyons_password.path;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICNyK0e6k0fOGbwGWi3Yg03Cg31OPgkIjA4ZKdc+rLIy blyons@fastmail.com"
     ];
   };
 
+  # Enable ZSH system-wide
+  programs.zsh.enable = true;
+
   # Networking
   networking = {
     hostName = "bamboo";
     networkmanager.enable = true;
-    firewall.enable = true;
+    firewall = {
+      enable = true;
+      # Allow Tailscale traffic
+      trustedInterfaces = [ "tailscale0" ];
+      checkReversePath = "loose";  # Required for Tailscale
+    };
   };
 
   time.timeZone = "America/Denver";
@@ -137,6 +196,37 @@
     rtkit.enable = true;
     polkit.enable = true;
     sudo.wheelNeedsPassword = false;
+    apparmor.enable = true;
+  };
+
+  # USBGuard - USB device authorization
+  services.usbguard = {
+    enable = true;
+    dbus.enable = true;  # Enable DBus interface for GUI tools
+    IPCAllowedGroups = [ "wheel" ];  # Allow wheel group to manage USBGuard
+    rules = ''
+      # USB Host Controllers
+      allow id 1d6b:0002 serial "0000:00:14.0" name "xHCI Host Controller" hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" parent-hash "rV9bfLq7c2eA4tYjVjwO4bxhm+y6GgZpl9J60L0fBkY=" with-interface 09:00:00 with-connect-type ""
+      allow id 1d6b:0003 serial "0000:00:14.0" name "xHCI Host Controller" hash "prM+Jby/bFHCn2lNjQdAMbgc6tse3xVx+hZwjOPHSdQ=" parent-hash "rV9bfLq7c2eA4tYjVjwO4bxhm+y6GgZpl9J60L0fBkY=" with-interface 09:00:00 with-connect-type ""
+      allow id 1d6b:0002 serial "0000:1f:00.0" name "xHCI Host Controller" hash "s9V4liDJBlYv0+TNjNWwxkz0EWwkcRoOHjIobLr2uFI=" parent-hash "y/hBL2KpMx2UFGN3ppStuUznESYeHZhJ6Qkt8Mpe+Mo=" with-interface 09:00:00 with-connect-type ""
+      allow id 1d6b:0003 serial "0000:1f:00.0" name "xHCI Host Controller" hash "50SSBXfvZ255h/FXcWZ0b593U5ZfiVv3Eyhg7MCzlFU=" parent-hash "y/hBL2KpMx2UFGN3ppStuUznESYeHZhJ6Qkt8Mpe+Mo=" with-interface 09:00:00 with-connect-type ""
+
+      # Audio interface
+      allow id 1235:8219 serial "S248F3E53ADA1C" name "Scarlett 2i2 4th Gen" hash "Rnoy9xBy42cKIsCQKa1JuIv9332uLEhk5DGhPcO0IsE=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 01:01:20 01:02:20 01:02:20 01:02:20 01:02:20 ff:01:20 } with-connect-type "hotplug"
+
+      # Mouse
+      allow id 1bcf:0005 serial "" name "USB Optical Mouse" hash "MZJHJAlLoXHFOsLGDiCcWprsu32/NU61IupjvjY6Lgs=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" via-port "1-3" with-interface 03:01:02 with-connect-type "hotplug"
+
+      # Webcam
+      allow id 046d:0825 serial "E5AF8F00" name "C270 HD WEBCAM" hash "Qv/xAJAykpwDlrjYh0gXVDZokVu6C3vBT56kPzn/DHg=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 0e:01:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 01:01:00 01:02:00 01:02:00 01:02:00 01:02:00 01:02:00 } with-connect-type "hotplug"
+
+      # Keyboard - Ergodox EZ
+      allow id 3297:4974 serial "LzWGM/B4wQwQ" name "Ergodox EZ" hash "D1io106SVqdPNqtz31CiQ6CCx2VLgEOs3kQ3Dq7jKms=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 03:01:01 03:00:00 03:01:02 03:00:00 } with-connect-type "hotplug"
+
+      # USB Flash Drives
+      allow id 154b:1006 serial "900049E75567BD58" name "USB 3.2.1 FD" hash "l+gVvaerBZulS5lJuAcqjpwoIMPefZzsIDkmArNvDt0=" parent-hash "prM+Jby/bFHCn2lNjQdAMbgc6tse3xVx+hZwjOPHSdQ=" with-interface 08:06:50 with-connect-type "hotplug"
+      allow id 125f:db8a serial "26324232500701AC" name "ADATA USB Flash Drive" hash "MvN59p6tTlMJ0qTouhGVdfXybiyltuOCLQE6wDccdZQ=" parent-hash "prM+Jby/bFHCn2lNjQdAMbgc6tse3xVx+hZwjOPHSdQ=" with-interface 08:06:50 with-connect-type "hotplug"
+    '';
   };
 
   # Docker
@@ -203,6 +293,12 @@
     useRoutingFeatures = "client";
   };
 
+  # SMART disk monitoring
+  services.smartd = {
+    enable = true;
+    notifications.wall.enable = true;
+  };
+
   # Hyprland
   programs.hyprland = {
     enable = true;
@@ -230,7 +326,6 @@
     enable = true;
     settings = {
       default_session = {
-        # command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd Hyprland";
         user = "greeter";
       };
     };
@@ -238,8 +333,6 @@
 
   programs.regreet = {
     enable = true;
-    # theme.package = pkgs.tokyonight-gtk-theme;
-    # theme.name = "Tokyonight-dark";
   };
 
   # Enable flakes and build optimizations
@@ -263,33 +356,6 @@
     dates = "04:00";  # Run daily at 4 AM
     allowReboot = false;  # Don't automatically reboot
   };
-
-  # # Enhanced logging and debugging for boot issues
-  # services.journald = {
-  #   extraConfig = ''
-  #     Storage=persistent
-  #     Compress=yes
-  #     SystemMaxUse=1G
-  #     SystemMaxFileSize=100M
-  #     ForwardToConsole=yes
-  #     MaxLevelConsole=debug
-  #   '';
-  # };
-
-  # # Emergency shell access for boot failures
-  # systemd.services."emergency-shell" = {
-  #   enable = true;
-  #   serviceConfig = {
-  #     ExecStart = "/bin/sh";
-  #     Type = "idle";
-  #     StandardInput = "tty-force";
-  #     StandardOutput = "inherit";
-  #     StandardError = "inherit";
-  #     KillMode = "process";
-  #     IgnoreSIGPIPE = false;
-  #     SendSIGHUP = true;
-  #   };
-  # };
 
   # System version
   system.stateVersion = "25.05";

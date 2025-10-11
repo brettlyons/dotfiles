@@ -14,11 +14,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hyprland = {
-      url = "github:hyprwm/Hyprland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     impermanence = {
       url = "github:nix-community/impermanence";
     };
@@ -28,13 +23,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote/v0.4.2";
-      inputs.nixpkgs.follows = "nixpkgs";
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware/master";
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, stylix, hyprland, impermanence, sops-nix, lanzaboote, ... }:
+  outputs = { self, nixpkgs, home-manager, stylix, impermanence, sops-nix, nixos-hardware, ... }:
   let
     system = "x86_64-linux";
 
@@ -52,14 +46,13 @@
         modules = [
           # Hardware configuration
           ./hardware-configuration.nix
+          # nixos-hardware.nixosModules.common-gpu-intel  # Disabled: intel-graphics-compiler fails with CMake 4.0
 
           # Core modules
           stylix.nixosModules.stylix
-          hyprland.nixosModules.default
           home-manager.nixosModules.home-manager
           impermanence.nixosModules.impermanence
           sops-nix.nixosModules.sops
-          lanzaboote.nixosModules.lanzaboote
 
           # Custom modules
           ./password-manager.nix
@@ -71,9 +64,6 @@
             # Allow unfree packages
             nixpkgs.config.allowUnfree = true;
 
-            # # Enable Hyprland
-            # programs.hyprland.enable = true;
-
             # Password manager
             services.passwordManager.enable = true;
 
@@ -82,8 +72,8 @@
               enable = true;
               polarity = "dark";
               image = ./fractals_designs_4k.jpg;
-              base16Scheme = "${pkgs.base16-schemes}/share/themes/onedark-dark.yaml";
-              # base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+              base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+              # base16Scheme = "${pkgs.base16-schemes}/share/themes/onedark-dark.yaml";
               fonts = {
                 monospace = {
                   package = pkgs.nerd-fonts.caskaydia-mono;

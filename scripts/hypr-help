@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# hypr-help: Display Hyprland keybindings reference
+# Usage: Bind this script to a hotkey in Hyprland (e.g., SUPER+/)
+
+# Define the help text
+read -r -d '' HELP_TEXT << 'EOF' || true
+╔═══════════════════════════════════════════════════════════════════╗
+║                  HYPRLAND KEYBINDINGS REFERENCE                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+APPLICATIONS
+  SUPER + Return       Launch Alacritty terminal
+  SUPER + B            Launch Firefox browser
+  SUPER + R            Launch Walker (application launcher)
+  SUPER + L            Lock screen (Hyprlock)
+  SUPER + SHIFT + E    Open file manager (Yazi)
+  SUPER + SHIFT + M    Open logout menu (Wlogout)
+
+WINDOW MANAGEMENT
+  SUPER + Q            Kill active window
+  SUPER + V            Toggle floating mode
+  SUPER + F            Toggle fullscreen
+  SUPER + P            Toggle pseudo-tiling
+  SUPER + J            Toggle split direction
+
+FOCUS NAVIGATION (Colemak-DH)
+  SUPER + M            Move focus left
+  SUPER + N            Move focus down
+  SUPER + E            Move focus up
+  SUPER + I            Move focus right
+
+MOVE WINDOWS (Colemak-DH)
+  SUPER + SHIFT + M    Move window left
+  SUPER + SHIFT + N    Move window down
+  SUPER + SHIFT + E    Move window up
+  SUPER + SHIFT + I    Move window right
+
+WORKSPACES
+  SUPER + 1-9,0        Switch to workspace 1-10
+  SUPER + SHIFT + 1-9,0  Move window to workspace 1-10
+
+SCRATCHPAD
+  SUPER + S            Toggle scratchpad workspace
+  SUPER + SHIFT + S    Move window to scratchpad
+
+SCREENSHOTS & RECORDING
+  Print                Screenshot region (select area)
+  SHIFT + Print        Screenshot active window
+  CTRL + Print         Screenshot full monitor
+  ALT + Print          Record region (toggle)
+  CTRL + ALT + Print   Record full monitor (toggle)
+  SUPER + Print        Color picker (copy to clipboard)
+
+NOTIFICATIONS
+  SUPER + ,            Dismiss notification
+  SUPER + SHIFT + ,    Dismiss all notifications
+
+SPECIAL FEATURES
+  SUPER + SHIFT + H    Helix Everywhere (edit text anywhere)
+  SUPER + /            Show this help (you are here!)
+
+MOUSE ACTIONS
+  SUPER + Left Click   Move window
+  SUPER + Right Click  Resize window
+
+SYSTEM INFO
+  Layout: Colemak-DH
+  Compositor: Hyprland
+  Launcher: Walker
+  Terminal: Alacritty
+
+Press 'q' to close this help
+EOF
+
+# Display help in a pager with Alacritty
+alacritty --class hypr-help --title "Hyprland Help" \
+    -e sh -c "echo \"$HELP_TEXT\" | less -R"

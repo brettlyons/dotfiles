@@ -29,6 +29,8 @@
       # Boot-critical paths
       { directory = "/etc/ssh"; user = "root"; group = "root"; mode = "0755"; }
       { directory = "/etc/secureboot"; user = "root"; group = "root"; mode = "0755"; }
+      { directory = "/usr/share/secureboot"; user = "root"; group = "root"; mode = "0755"; }
+      { directory = "/var/lib/sbctl"; user = "root"; group = "root"; mode = "0755"; }
       
       # System directories (not boot-critical)
       "/var/log"

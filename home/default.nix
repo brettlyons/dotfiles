@@ -17,6 +17,12 @@
         source = ../scripts/helix-everywhere;
         executable = true;
       };
+
+      # hypr-help script
+      ".local/bin/hypr-help" = {
+        source = ../scripts/hypr-help;
+        executable = true;
+      };
     };
   };
 
@@ -118,7 +124,10 @@
     jq
     ripgrep      # Fast grep with PCRE2 support
     fd           # Fast find alternative
+    bat          # Better cat with syntax highlighting
+    tealdeer     # tldr man pages
     wtype        # Wayland text typing tool (xdotool for Wayland)
+    wl-clipboard # Wayland clipboard utilities
     pwvucontrol  # PipeWire audio device manager
     wlogout      # Logout menu
     hyprlock     # Screen locker
@@ -129,6 +138,7 @@
     grim         # Screenshot utility for Wayland
     slurp        # Region selector for Wayland
     wf-recorder  # Screen recording for wlroots compositors
+    hyprpicker   # Color picker for Hyprland
 
     # Container tools
     distrobox    # Container-based Linux distributions
@@ -136,6 +146,10 @@
     # Editor
     helix
     zk
+    yazi         # Terminal file manager
+
+    # Keyboard configuration
+    keymapp      # ZSA keyboard configuration (Ergodox EZ, Moonlander, etc.)
 
     # Media
     mpv
@@ -146,22 +160,23 @@
     gtk.enable = true;
     package = pkgs.graphite-cursors;
     name = "graphite-light";
-    # name = "graphite-dark-nord"
-    # name = "graphite-light-nord"
   };
 
   gtk = {
     enable = true;
 
-    # theme = {
-    #   package = pkgs.tokyonight-gtk-theme;
-    #   name = "Tokyonight-dark";
-    # };
-
     iconTheme = {
       package = pkgs.colloid-icon-theme;
       name = "Colloid-Dark";
     };
+  };
+
+  # Chromium with Bitwarden extension
+  programs.chromium = {
+    enable = true;
+    extensions = [
+      "nngceckbapebfimnlniiiahkandclblb"  # Bitwarden
+    ];
   };
 
   # Hyprland configuration (colors handled by Stylix)
@@ -180,7 +195,16 @@
 
       misc = {
         vfr = true;  # Variable refresh rate
-        vrr = 1;     # Adaptive sync
+        vrr = 0;     # Adaptive sync (disabled - testing for flickering fix)
+      };
+
+      cursor = {
+        inactive_timeout = 2;         # Hide cursor after 2 seconds of inactivity
+        hide_on_key_press = true;     # Hide cursor when typing
+      };
+
+      render = {
+        direct_scanout = true;  # Allow direct scanout for fullscreen windows
       };
 
       # Dynamic cursor plugin configuration
@@ -213,7 +237,7 @@
         "$mod, B, exec, firefox"
         "$mod, Q, killactive"
         "$mod+SHIFT, M, exec, wlogout"
-        "$mod+SHIFT, E, exec, dolphin"
+        "$mod+SHIFT, E, exec, alacritty -e yazi"
         "$mod, V, togglefloating"
         "$mod, R, exec, walker"
         "$mod, P, pseudo"
@@ -227,14 +251,23 @@
         "$mod, e, movefocus, u"
         "$mod, n, movefocus, d"
 
+        # Move windows (Colemak-DH)
+        "$mod SHIFT, m, movewindow, l"
+        "$mod SHIFT, i, movewindow, r"
+        "$mod SHIFT, e, movewindow, u"
+        "$mod SHIFT, n, movewindow, d"
+
         # Scratchpad
         "$mod, S, togglespecialworkspace, scratchpad"
         "$mod SHIFT, S, movetoworkspace, special:scratchpad"
 
-        # Screenshots & Recording
+        # Screenshots & Recording (Omarchy-style)
         ", Print, exec, grim -g \"$(slurp)\" ~/Pictures/screenshots/$(date +%Y%m%d_%H%M%S).png"
         "SHIFT, Print, exec, grim -g \"$(hyprctl activewindow -j | jq -r '\"\\(.at[0]),\\(.at[1]) \\(.size[0])x\\(.size[1])\"')\" ~/Pictures/screenshots/$(date +%Y%m%d_%H%M%S).png"
-        "ALT, Print, exec, killall -s SIGINT wf-recorder || wf-recorder -g \"$(slurp)\" -f ~/Videos/recordings/$(date +%Y%m%d_%H%M%S).mp4"
+        "CTRL, Print, exec, grim ~/Pictures/screenshots/$(date +%Y%m%d_%H%M%S).png"
+        "ALT, Print, exec, pkill -x wf-recorder || wf-recorder -g \"$(slurp)\" -f ~/Videos/recordings/$(date +%Y%m%d_%H%M%S).mp4"
+        "CTRL ALT, Print, exec, pkill -x wf-recorder || wf-recorder -f ~/Videos/recordings/$(date +%Y%m%d_%H%M%S).mp4"
+        "SUPER, Print, exec, hyprpicker -a"
 
         # Notifications
         "$mod, comma, exec, makoctl dismiss"
@@ -242,6 +275,9 @@
 
         # Helix Everywhere - edit text from anywhere
         "$mod SHIFT, H, exec, $HOME/.local/bin/helix-everywhere"
+
+        # Help - show keybindings reference
+        "$mod, slash, exec, $HOME/.local/bin/hypr-help"
 
         # Switch to workspace
         "$mod, 1, workspace, 1"
@@ -290,9 +326,6 @@
         };
         active_opacity = 1.0;
         inactive_opacity = 0.85;
-        # drop_shadow = true;
-        # shadow_range = 4;
-        # shadow_render_power = 3;
       };
 
       # Workspace rules
@@ -306,11 +339,49 @@
         "float, class:^(helix-everywhere)$"
         "size 80% 80%, class:^(helix-everywhere)$"
         "center, class:^(helix-everywhere)$"
+        "float, class:^(hypr-help)$"
+        "size 60% 70%, class:^(hypr-help)$"
+        "center, class:^(hypr-help)$"
+      ];
+
+      # Autostart applications
+      exec-once = [
+        "usbguard-notifier"  # GUI notifications for USB device authorization
       ];
     };
   };
 
-  # Bash shell
+  # ZSH shell
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+
+    shellAliases = {
+      kali = "distrobox enter kali --root";
+      cat = "bat";
+      ls = "eza";
+    };
+
+    history = {
+      size = 10000;
+      path = "${config.home.homeDirectory}/.zsh_history";
+    };
+
+    initExtra = ''
+      # Case-insensitive completion
+      zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
+      # Better completion menu
+      zstyle ':completion:*' menu select
+
+      # Colored completion
+      zstyle ':completion:*' list-colors "''${(s.:.)LS_COLORS}"
+    '';
+  };
+
+  # Keep bash as fallback
   programs.bash = {
     enable = true;
     shellAliases = {
@@ -322,6 +393,7 @@
   programs.direnv = {
     enable = true;
     enableBashIntegration = true;
+    enableZshIntegration = true;
     nix-direnv.enable = true;  # Better Nix integration with caching
   };
 
@@ -329,7 +401,16 @@
   programs.alacritty = {
     enable = true;
     settings = {
-      window.opacity = lib.mkForce 0.99;  # Enable transparency support for Hyprland
+      window = {
+        opacity = lib.mkForce 1.0;  # Disable transparency to fix flickering
+        blur = false;  # Don't request blur from Alacritty, let Hyprland handle it
+        padding = {
+          x = 5;
+          y = 5;
+        };
+      };
+
+      # Removed debug renderer overrides - use Alacritty defaults
     };
   };
 
@@ -337,6 +418,7 @@
   programs.eza = {
     enable = true;
     enableBashIntegration = true;
+    enableZshIntegration = true;
     icons = "always";
     git = true;
     extraOptions = [
@@ -349,6 +431,7 @@
   programs.starship = {
     enable = true;
     enableBashIntegration = true;
+    enableZshIntegration = true;
   };
 
   # Walker application launcher
@@ -366,6 +449,17 @@
         padding: 0 8px;
         min-width: 20px;
       }
+      #custom-recording {
+        padding: 0 8px;
+        color: #ff5555;
+        font-weight: bold;
+        animation: blink 1s ease-in-out infinite;
+      }
+      @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+      }
     '';
     settings = {
       mainBar = {
@@ -375,7 +469,7 @@
 
         modules-left = [ "hyprland/workspaces" "hyprland/window" ];
         modules-center = [ "clock" ];
-        modules-right = [ "pulseaudio" "custom/separator" "custom/hypridle" "custom/separator" "power-profiles-daemon" "custom/separator" "cpu" "memory" "custom/separator" "network" "battery" "custom/separator" "tray" ];
+        modules-right = [ "custom/recording" "pulseaudio" "custom/separator" "custom/hypridle" "custom/separator" "power-profiles-daemon" "custom/separator" "cpu" "memory" "custom/separator" "network" "battery" "custom/separator" "tray" ];
 
         "hyprland/workspaces" = {
           format = "{icon}";
@@ -418,6 +512,13 @@
             default = [ "󰕿" "󰖀" "󰕾" ];
           };
           on-click = "pwvucontrol";
+        };
+
+        "custom/recording" = {
+          format = "{}";
+          exec = "pgrep -x wf-recorder >/dev/null && echo '󰑊' || echo ''";
+          interval = 1;
+          tooltip-format = "Screen recording active";
         };
 
         "custom/hypridle" = {
@@ -489,6 +590,19 @@
     settings = {
       default-timeout = 5000;  # Auto-dismiss after 5 seconds
     };
+  };
+
+  # Cliphist - clipboard history manager
+  services.cliphist = {
+    enable = true;
+    allowImages = true;
+  };
+
+  # zoxide - smarter cd command
+  programs.zoxide = {
+    enable = true;
+    enableBashIntegration = true;
+    enableZshIntegration = true;
   };
 
   # Let Home Manager manage itself
