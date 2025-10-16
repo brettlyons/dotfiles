@@ -239,20 +239,71 @@
     defaultNetwork.settings.dns_enabled = true;
   };
 
-  # Kali Linux distrobox setup - runs once to create container
-  system.activationScripts.kaliDistrobox = lib.stringAfter [ "users" ] ''
-    # Check if kali distrobox already exists
-    if ! ${pkgs.podman}/bin/podman container exists kali 2>/dev/null; then
-      echo "Creating Kali Linux distrobox container..."
-      ${pkgs.distrobox}/bin/distrobox create \
-        --name kali \
-        --image docker.io/kalilinux/kali-rolling \
-        --root \
-        --additional-flags "--cap-add=NET_RAW --cap-add=NET_ADMIN" \
-        --init-hooks "apt update && apt full-upgrade -y && apt install -y kali-linux-headless" \
-        --yes || true
-    fi
-  '';
+  # Kali Linux declarative container
+  virtualisation.oci-containers = {
+    backend = "podman";
+    containers.kali = {
+      image = "docker.io/kalilinux/kali-rolling:latest";
+      autoStart = true;
+      extraOptions = [
+        "--cap-add=NET_RAW"
+        "--cap-add=NET_ADMIN"
+        "--cap-add=SYS_PTRACE"  # For debugging tools
+        "--security-opt=apparmor=unconfined"  # Required for some security tools
+        "--privileged"  # Kali security tools need elevated privileges
+      ];
+      volumes = [
+        "/persist/system/kali/home:/root:rw"  # Persistent home directory
+        "/persist/system/kali/data:/data:rw"  # Persistent data directory
+      ];
+      # Keep container running
+      cmd = [ "sleep" "infinity" ];
+    };
+  };
+
+  # Automatic Kali tools installation on first boot
+  systemd.services.kali-setup = {
+    description = "Install Kali Linux headless tools on first boot";
+    after = [ "podman-kali.service" ];
+    requires = [ "podman-kali.service" ];
+    wantedBy = [ "multi-user.target" ];
+
+    # Only run once - creates marker file after successful installation
+    unitConfig = {
+      ConditionPathExists = "!/persist/system/kali/.setup-complete";
+    };
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      # Wait for container to be fully ready
+      ExecStartPre = "${pkgs.coreutils}/bin/sleep 10";
+      ExecStart = pkgs.writeShellScript "kali-setup" ''
+        set -e
+        echo "Installing Kali Linux headless tools..."
+
+        # Update and install kali-linux-headless
+        ${pkgs.podman}/bin/podman exec kali bash -c "
+          export DEBIAN_FRONTEND=noninteractive
+          apt update
+          apt full-upgrade -y
+          apt install -y kali-linux-headless
+          apt clean
+        "
+
+        # Copy Kali default shell configs
+        echo "Configuring shell environment..."
+        ${pkgs.podman}/bin/podman exec kali bash -c "
+          cp /etc/skel/.zshrc /root/.zshrc
+          cp /etc/skel/.bashrc /root/.bashrc
+        "
+
+        # Create marker file to prevent re-running
+        ${pkgs.coreutils}/bin/touch /persist/system/kali/.setup-complete
+        echo "Kali Linux setup complete!"
+      '';
+    };
+  };
 
   # ZRAM - Compressed RAM swap
   zramSwap = {
