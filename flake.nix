@@ -46,7 +46,7 @@
         modules = [
           # Hardware configuration
           ./hardware-configuration.nix
-          # nixos-hardware.nixosModules.common-gpu-intel  # Disabled: intel-graphics-compiler fails with CMake 4.0
+          nixos-hardware.nixosModules.common-gpu-intel  # Disabled: intel-graphics-compiler fails with CMake 4.0
 
           # Core modules
           stylix.nixosModules.stylix
