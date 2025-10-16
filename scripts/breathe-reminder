@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Breathing reminder script
+# Shows brief centered messages to encourage mindfulness
+
+# Array of breathing reminders
+messages=(
+  "B R E A T H E   D E E P E R"
+  "R E L A X   Y O U R   M I N D   O P E N"
+  "S O F T E N   Y O U R   B R E A T H"
+  "A W A R E N E S S   F L O W S"
+  "P R E S E N T   M O M E N T"
+  "G E N T L E   B R E A T H I N G"
+)
+
+# Pick a random message
+message="${messages[$RANDOM % ${#messages[@]}]}"
+
+# Show brief centered notification (500ms - subliminal but visible)
+notify-send \
+  --urgency=critical \
+  --expire-time=500 \
+  --app-name="breathe" \
+  "$message"

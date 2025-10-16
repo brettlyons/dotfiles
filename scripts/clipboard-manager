@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# clipboard-manager: Manage clipboard history with cliphist
+# Usage: Bind this script to Super+Shift+P
+
+# Show management menu
+action=$(echo -e "📋 View & Paste\n🗑️  Delete Item\n🧹 Wipe All History\n❌ Cancel" | fuzzel --dmenu --prompt="Clipboard Manager: ")
+
+case "$action" in
+  "📋 View & Paste")
+    # Show clipboard history and paste selection
+    cliphist list | fuzzel --dmenu --prompt="Select to paste: " | cliphist decode | wl-copy
+    ;;
+  "🗑️  Delete Item")
+    # Show clipboard history and delete selection
+    cliphist list | fuzzel --dmenu --prompt="Select to delete: " | cliphist delete
+    ;;
+  "🧹 Wipe All History")
+    # Confirm before wiping
+    confirm=$(echo -e "Yes, wipe everything\nNo, cancel" | fuzzel --dmenu --prompt="Wipe clipboard history? ")
+    if [ "$confirm" = "Yes, wipe everything" ]; then
+      cliphist wipe
+      notify-send "Clipboard" "History cleared"
+    fi
+    ;;
+  *)
+    # Cancel or empty selection
+    exit 0
+    ;;
+esac

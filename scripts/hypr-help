@@ -22,7 +22,7 @@ WINDOW MANAGEMENT
   SUPER + Q            Kill active window
   SUPER + V            Toggle floating mode
   SUPER + F            Toggle fullscreen
-  SUPER + P            Toggle pseudo-tiling
+  SUPER + T            Toggle pseudo-tiling
   SUPER + J            Toggle split direction
 
 FOCUS NAVIGATION (Colemak-DH)
@@ -53,7 +53,9 @@ SCREENSHOTS & RECORDING
   CTRL + ALT + Print   Record full monitor (toggle)
   SUPER + Print        Color picker (copy to clipboard)
 
-NOTIFICATIONS
+CLIPBOARD & NOTIFICATIONS
+  SUPER + P            Clipboard history (paste)
+  SUPER + SHIFT + P    Clipboard manager (paste/delete/wipe)
   SUPER + ,            Dismiss notification
   SUPER + SHIFT + ,    Dismiss all notifications
 

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Wrapper to alias markdown-oxide as marksman
+# marksman has dynamic linking issues on NixOS, so we use markdown-oxide instead
+exec markdown-oxide "$@"

@@ -50,6 +50,10 @@
       "/var/lib/libvirt"
       "/var/lib/postgresql"
 
+      # Kali container persistent storage
+      { directory = "/persist/system/kali/home"; user = "root"; group = "root"; mode = "0700"; }
+      { directory = "/persist/system/kali/data"; user = "root"; group = "root"; mode = "0755"; }
+
       # User home directory
       "/home/${userConfig.username}"
     ];
@@ -90,6 +94,7 @@
         # Development tools
         ".local/bin"
         ".local/share/direnv"
+        ".local/share/nvim"  # Neovim plugin data and lazy.nvim cache
         ".local/share/task"
         ".local/share/timewarrior"
         ".local/share/keyrings"
@@ -105,10 +110,12 @@
         # Cache (selective)
         ".cache/cliphist"
         ".cache/distrobox"
+        ".cache/nvim"  # Neovim lazy.nvim download cache
         ".cache/qutebrowser"
         ".cache/rancher-desktop"
         
         # State
+        ".local/state/nvim"  # Neovim shada, view, swap files
         ".local/state/wireplumber"
         
         # Rancher Desktop

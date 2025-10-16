@@ -1,11 +1,26 @@
-{ config, lib, pkgs, userConfig, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  userConfig,
+  ...
+}:
 
 {
+  # Disable Stylix for Neovim (LazyVim will manage configuration)
+  stylix.targets.neovim.enable = false;
+
   # Basic user info
   home = {
     username = userConfig.username;
     homeDirectory = "/home/${userConfig.username}";
     stateVersion = "25.05";
+
+    # Explicitly set session variables for systemd user session
+    sessionVariables = {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+    };
 
     # Ensure screenshot and recording directories exist
     file = {
@@ -21,6 +36,24 @@
       # hypr-help script
       ".local/bin/hypr-help" = {
         source = ../scripts/hypr-help;
+        executable = true;
+      };
+
+      # clipboard-manager script
+      ".local/bin/clipboard-manager" = {
+        source = ../scripts/clipboard-manager;
+        executable = true;
+      };
+
+      # marksman wrapper (aliases markdown-oxide)
+      ".local/bin/marksman" = {
+        source = ../scripts/marksman;
+        executable = true;
+      };
+
+      # breathe-reminder script
+      ".local/bin/breathe-reminder" = {
+        source = ../scripts/breathe-reminder;
         executable = true;
       };
     };
@@ -57,6 +90,7 @@
       };
       "*.{md,txt}" = {
         trim_trailing_whitespace = false;
+        max_line_length = 80;
       };
       "Makefile" = {
         indent_style = "tab";
@@ -68,10 +102,11 @@
   programs.emacs = {
     enable = true;
     package = pkgs.emacs-pgtk;
-    extraPackages = epkgs: with epkgs; [
-      vterm
-      # mu4e  # Commented out due to build failure
-    ];
+    extraPackages =
+      epkgs: with epkgs; [
+        vterm
+        # mu4e # Commented out due to build failure
+      ];
   };
 
   # Packages
@@ -94,26 +129,29 @@
     caido
 
     # Forensics & analysis tools
-    binutils     # strings, objdump, etc.
-    file         # File type identifier
-    exiftool     # EXIF metadata tool
-    cyberchef    # Data analysis Swiss Army knife
-    unzip        # Archive extraction
-    p7zip        # 7z archive support
-    volatility3  # Memory forensics framework
-    swayimg      # Image viewer for Wayland/Hyprland
-    sqlite       # SQLite database CLI
-    john         # John the Ripper password cracker
-    hashcat      # GPU-accelerated password cracker
-    sleuthkit    # Disk forensics toolkit
-    foremost     # File carving tool
-    bulk_extractor  # Extract information from disk images
+    binutils # strings, objdump, etc.
+    file # File type identifier
+    exiftool # EXIF metadata tool
+    cyberchef # Data analysis Swiss Army knife
+    unzip # Archive extraction
+    p7zip # 7z archive support
+    volatility3 # Memory forensics framework
+    swayimg # Image viewer for Wayland/Hyprland
+    sqlite # SQLite database CLI
+    john # John the Ripper password cracker
+    hashcat # GPU-accelerated password cracker
+    wordlists
+    sleuthkit # Disk forensics toolkit
+    foremost # File carving tool
+    bulk_extractor # Extract information from disk images
 
     # Development
     vscode
     firefox
-    tridactyl-native  # Native messenger for Tridactyl Firefox extension
+    tridactyl-native # Native messenger for Tridactyl Firefox extension
     claude-code
+    python3 # Python interpreter (needed for taskwarrior)
+    timewarrior
 
     # System tools
     htop
@@ -122,34 +160,60 @@
     curl
     wget
     jq
-    ripgrep      # Fast grep with PCRE2 support
-    fd           # Fast find alternative
-    bat          # Better cat with syntax highlighting
-    tealdeer     # tldr man pages
-    wtype        # Wayland text typing tool (xdotool for Wayland)
+    ripgrep # Fast grep with PCRE2 support
+    fd # Fast find alternative
+    bat # Better cat with syntax highlighting
+    tealdeer # tldr man pages
+    wtype # Wayland text typing tool (xdotool for Wayland)
     wl-clipboard # Wayland clipboard utilities
-    pwvucontrol  # PipeWire audio device manager
-    wlogout      # Logout menu
-    hyprlock     # Screen locker
-    qalculate-gtk  # Calculator (qalc CLI for Walker)
-    libnotify    # Desktop notifications (notify-send)
+    pwvucontrol # PipeWire audio device manager
+    wlogout # Logout menu
+    hyprlock # Screen locker
+    qalculate-gtk # Calculator (qalc CLI for Walker)
+    libnotify # Desktop notifications (notify-send)
 
     # Screenshot & recording tools
-    grim         # Screenshot utility for Wayland
-    slurp        # Region selector for Wayland
-    wf-recorder  # Screen recording for wlroots compositors
-    hyprpicker   # Color picker for Hyprland
+    grim # Screenshot utility for Wayland
+    slurp # Region selector for Wayland
+    wf-recorder # Screen recording for wlroots compositors
+    hyprpicker # Color picker for Hyprland
 
     # Container tools
-    distrobox    # Container-based Linux distributions
+    distrobox # Container-based Linux distributions
 
     # Editor
     helix
     zk
-    yazi         # Terminal file manager
+    yazi # Terminal file manager
+
+    # Neovim dependencies and LSP servers
+    gcc # C compiler for treesitter
+    gnumake # Build tool
+    tree-sitter # Tree-sitter CLI for nvim-treesitter
+    nodejs # Node.js runtime for many LSP servers
+    cargo # Rust toolchain for rust-analyzer
+    ripgrep # Required by telescope.nvim
+    fd # Required by telescope.nvim
+
+    # LSP servers (managed by Nix, not mason.nvim)
+    lua-language-server
+    nil # Nix LSP
+    rust-analyzer
+    pyright # Python LSP
+    nodePackages.typescript-language-server
+    nodePackages.bash-language-server
+    nodePackages.vscode-langservers-extracted # HTML/CSS/JSON/ESLint
+    markdown-oxide # Markdown LSP (Obsidian-inspired)
+
+    # Formatters and linters
+    stylua # Lua formatter
+    nixfmt-rfc-style # Nix formatter
+    black # Python formatter
+    nodePackages.prettier
+    markdownlint-cli2 # Markdown linter
 
     # Keyboard configuration
-    keymapp      # ZSA keyboard configuration (Ergodox EZ, Moonlander, etc.)
+    keymapp # ZSA keyboard configuration (Ergodox EZ, Moonlander, etc.)
 
     # Media
     mpv
@@ -175,7 +239,7 @@
   programs.chromium = {
     enable = true;
     extensions = [
-      "nngceckbapebfimnlniiiahkandclblb"  # Bitwarden
+      "nngceckbapebfimnlniiiahkandclblb" # Bitwarden
     ];
   };
 
@@ -190,33 +254,33 @@
 
       # Monitor configuration with HDR and 2x scaling
       monitor = [
-        ",preferred,auto,2,bitdepth,10,cm,auto"  # All monitors: preferred resolution, auto position, 2x scale, 10-bit color, auto color management
+        ",preferred,auto,2,bitdepth,10,cm,auto" # All monitors: preferred resolution, auto position, 2x scale, 10-bit color, auto color management
       ];
 
       misc = {
-        vfr = true;  # Variable refresh rate
-        vrr = 0;     # Adaptive sync (disabled - testing for flickering fix)
+        vfr = true; # Variable refresh rate
+        vrr = 0; # Adaptive sync (disabled - testing for flickering fix)
       };
 
       cursor = {
-        inactive_timeout = 2;         # Hide cursor after 2 seconds of inactivity
-        hide_on_key_press = true;     # Hide cursor when typing
+        inactive_timeout = 2; # Hide cursor after 2 seconds of inactivity
+        hide_on_key_press = true; # Hide cursor when typing
       };
 
       render = {
-        direct_scanout = true;  # Allow direct scanout for fullscreen windows
+        direct_scanout = true; # Allow direct scanout for fullscreen windows
       };
 
       # Dynamic cursor plugin configuration
       "plugin:dynamic-cursors" = {
         enabled = true;
-        mode = "rotate";  # Options: none, tilt, rotate, stretch
+        mode = "rotate"; # Options: none, tilt, rotate, stretch
 
         # Shake to find configuration
         shake = {
           enabled = true;
-          threshold = 4.0;  # Sensitivity
-          factor = 1.5;     # How much bigger the cursor gets
+          threshold = 4.0; # Sensitivity
+          factor = 1.5; # How much bigger the cursor gets
         };
       };
 
@@ -229,18 +293,20 @@
           natural_scroll = false;
         };
         sensitivity = 0;
-        accel_profile = "adaptive";  # Options: adaptive, flat
+        accel_profile = "adaptive"; # Options: adaptive, flat
       };
-      
+
       bind = [
         "$mod, Return, exec, alacritty"
         "$mod, B, exec, firefox"
         "$mod, Q, killactive"
-        "$mod+SHIFT, M, exec, wlogout"
-        "$mod+SHIFT, E, exec, alacritty -e yazi"
+        "$mod, Escape, exec, wlogout"
+        "$mod, O, exec, alacritty -e yazi"
         "$mod, V, togglefloating"
-        "$mod, R, exec, walker"
-        "$mod, P, pseudo"
+        "$mod, D, exec, walker"
+        "$mod, P, exec, cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"
+        "$mod SHIFT, P, exec, $HOME/.local/bin/clipboard-manager"
+        "$mod, T, pseudo"
         "$mod, J, togglesplit"
         "$mod, L, exec, hyprlock"
         "$mod, F, fullscreen"
@@ -306,10 +372,10 @@
 
       # Mouse bindings
       bindm = [
-        "$mod, mouse:272, movewindow"      # SUPER + left-click to move
-        "$mod, mouse:273, resizewindow"    # SUPER + right-click to resize
+        "$mod, mouse:272, movewindow" # SUPER + left-click to move
+        "$mod, mouse:273, resizewindow" # SUPER + right-click to resize
       ];
-      
+
       general = {
         gaps_in = 5;
         gaps_out = 10;
@@ -326,6 +392,22 @@
         };
         active_opacity = 1.0;
         inactive_opacity = 0.85;
+      };
+
+      # Subtle breathing animations
+      animations = {
+        enabled = true;
+        bezier = [
+          "breathe, 0.37, 0, 0.63, 1" # Smooth breathing ease curve
+        ];
+        animation = [
+          "windows, 1, 5, breathe, slide"
+          "windowsOut, 1, 5, breathe, slide"
+          "border, 1, 10, breathe"
+          "borderangle, 1, 15, breathe, loop"
+          "fade, 1, 5, breathe"
+          "workspaces, 1, 6, breathe, slide"
+        ];
       };
 
       # Workspace rules
@@ -346,7 +428,7 @@
 
       # Autostart applications
       exec-once = [
-        "usbguard-notifier"  # GUI notifications for USB device authorization
+        "usbguard-notifier" # GUI notifications for USB device authorization
       ];
     };
   };
@@ -359,7 +441,7 @@
     syntaxHighlighting.enable = true;
 
     shellAliases = {
-      kali = "distrobox enter kali --root";
+      kali = "sudo podman exec -it kali bash";
       cat = "bat";
       ls = "eza";
     };
@@ -369,7 +451,7 @@
       path = "${config.home.homeDirectory}/.zsh_history";
     };
 
-    initExtra = ''
+    initContent = ''
       # Case-insensitive completion
       zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
@@ -385,7 +467,7 @@
   programs.bash = {
     enable = true;
     shellAliases = {
-      kali = "distrobox enter kali --root";
+      kali = "sudo podman exec -it kali bash";
     };
   };
 
@@ -394,7 +476,49 @@
     enable = true;
     enableBashIntegration = true;
     enableZshIntegration = true;
-    nix-direnv.enable = true;  # Better Nix integration with caching
+    nix-direnv.enable = true; # Better Nix integration with caching
+  };
+
+  # fzf - command-line fuzzy finder
+  programs.fzf = {
+    enable = true;
+    enableBashIntegration = true;
+    enableZshIntegration = true;
+    defaultCommand = "fd --type f --hidden --exclude .git";
+    defaultOptions = [
+      "--height 40%"
+      "--border"
+      "--layout=reverse"
+    ];
+  };
+
+  # Neovim with LazyVim support
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+
+    # Extra packages for mason.nvim compatibility
+    extraPackages = with pkgs; [
+      # Core build dependencies
+      gcc
+      gnumake
+      unzip
+      curl
+      git
+    ];
+  };
+
+  # Fuzzel launcher (styled by Stylix)
+  programs.fuzzel = {
+    enable = true;
+    settings = {
+      main = {
+        terminal = "${pkgs.alacritty}/bin/alacritty";
+        layer = "overlay";
+      };
+    };
   };
 
   # Terminal (font handled by Stylix)
@@ -402,8 +526,8 @@
     enable = true;
     settings = {
       window = {
-        opacity = lib.mkForce 1.0;  # Disable transparency to fix flickering
-        blur = false;  # Don't request blur from Alacritty, let Hyprland handle it
+        opacity = lib.mkForce 1.0; # Disable transparency to fix flickering
+        blur = false; # Don't request blur from Alacritty, let Hyprland handle it
         padding = {
           x = 5;
           y = 5;
@@ -467,9 +591,27 @@
         position = "top";
         height = 36;
 
-        modules-left = [ "hyprland/workspaces" "hyprland/window" ];
+        modules-left = [
+          "hyprland/workspaces"
+          "hyprland/window"
+        ];
         modules-center = [ "clock" ];
-        modules-right = [ "custom/recording" "pulseaudio" "custom/separator" "custom/hypridle" "custom/separator" "power-profiles-daemon" "custom/separator" "cpu" "memory" "custom/separator" "network" "battery" "custom/separator" "tray" ];
+        modules-right = [
+          "custom/recording"
+          "pulseaudio"
+          "custom/separator"
+          "custom/hypridle"
+          "custom/separator"
+          "power-profiles-daemon"
+          "custom/separator"
+          "cpu"
+          "memory"
+          "custom/separator"
+          "network"
+          "battery"
+          "custom/separator"
+          "tray"
+        ];
 
         "hyprland/workspaces" = {
           format = "{icon}";
@@ -509,7 +651,11 @@
           format = "{icon} {volume}%";
           format-muted = "󰝟 Muted";
           format-icons = {
-            default = [ "󰕿" "󰖀" "󰕾" ];
+            default = [
+              "󰕿"
+              "󰖀"
+              "󰕾"
+            ];
           };
           on-click = "pwvucontrol";
         };
@@ -567,7 +713,19 @@
 
         battery = {
           format = "{icon} {capacity}%";
-          format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+          format-icons = [
+            "󰂎"
+            "󰁺"
+            "󰁻"
+            "󰁼"
+            "󰁽"
+            "󰁾"
+            "󰁿"
+            "󰂀"
+            "󰂁"
+            "󰂂"
+            "󰁹"
+          ];
           format-charging = "󰂄 {capacity}%";
         };
 
@@ -587,8 +745,45 @@
   # Mako notification daemon
   services.mako = {
     enable = true;
-    settings = {
-      default-timeout = 5000;  # Auto-dismiss after 5 seconds
+    extraConfig = ''
+      default-timeout=5000
+
+      [app-name=breathe]
+      anchor=center
+      font=monospace 48
+      width=1200
+      height=400
+      border-size=0
+      background-color=#00000000
+      text-color=#FFFFFFDD
+      default-timeout=500
+    '';
+  };
+
+  # Breathing reminder systemd service
+  systemd.user.services.breathe-reminder = {
+    Unit = {
+      Description = "Subtle breathing reminder";
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${config.home.homeDirectory}/.local/bin/breathe-reminder";
+    };
+  };
+
+  # Breathing reminder timer - triggers randomly between 20s-30min
+  systemd.user.timers.breathe-reminder = {
+    Unit = {
+      Description = "Timer for breathing reminders";
+    };
+    Timer = {
+      OnBootSec = "1min"; # First trigger 1 minute after boot
+      OnUnitActiveSec = "20s"; # Base interval of 20 seconds
+      RandomizedDelaySec = "30min"; # Add random delay up to 30 minutes
+      Persistent = false;
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
     };
   };
 

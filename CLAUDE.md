@@ -147,6 +147,136 @@ For persistence changes:
 - Test reboot to ensure system remains bootable
 - User data loss can occur if directories not listed in persistence config
 
+## Neovim / LazyVim Setup
+
+Neovim is configured via Home Manager with LSP servers managed by Nix instead of mason.nvim.
+
+**Important:** Stylix Neovim target is disabled (`stylix.targets.neovim.enable = false`) to allow LazyVim to manage the configuration. This prevents conflicts between Stylix's `init.lua` and LazyVim's configuration.
+
+### Theming
+
+To maintain consistent theming with the system (tokyo-night), configure LazyVim's colorscheme:
+
+```lua
+-- Add to ~/.config/nvim/lua/config/lazy.lua or create ~/.config/nvim/lua/plugins/colorscheme.lua
+return {
+  {
+    "folke/tokyonight.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      style = "night",  -- Options: storm, night, moon, day
+    },
+  },
+  {
+    "LazyVim/LazyVim",
+    opts = {
+      colorscheme = "tokyonight",
+    },
+  },
+}
+```
+
+### Initial LazyVim Bootstrap
+
+After rebuilding the system, bootstrap LazyVim:
+
+```bash
+# Remove Home Manager's nvim config directory (if it exists)
+rm -rf ~/.config/nvim
+
+# Clone LazyVim starter configuration
+git clone https://github.com/LazyVim/starter ~/.config/nvim
+cd ~/.config/nvim
+rm -rf .git  # Remove git to make it your own config
+
+# Launch neovim - LazyVim will install plugins automatically
+nvim
+```
+
+### LSP Server Configuration
+
+LSP servers are installed via Nix (see `home/default.nix`) and available system-wide:
+- `lua-language-server` - Lua
+- `nil` - Nix
+- `rust-analyzer` - Rust
+- `pyright` - Python
+- `typescript-language-server` - TypeScript/JavaScript
+- `bash-language-server` - Bash
+- `vscode-langservers-extracted` - HTML/CSS/JSON/ESLint
+- `markdown-oxide` - Markdown (Obsidian-inspired)
+
+LazyVim will automatically detect these without needing mason.nvim installation.
+
+**Note on Markdown LSP:** We use `markdown-oxide` instead of `marksman` because marksman is a pre-built binary with dynamic linking issues on NixOS. markdown-oxide is a Rust-based alternative that works perfectly on NixOS and offers Obsidian-like features (wiki links, daily notes, etc.).
+
+### AI Coding Assistant Options
+
+Several AI plugins work well with LazyVim:
+
+**Option 1: avante.nvim** (Claude integration)
+```lua
+-- Add to ~/.config/nvim/lua/plugins/avante.lua
+return {
+  "yetone/avante.nvim",
+  event = "VeryLazy",
+  opts = {
+    provider = "claude",
+    claude = {
+      endpoint = "https://api.anthropic.com",
+      model = "claude-sonnet-4-5-20250929",
+      temperature = 0,
+      max_tokens = 8000,
+    },
+  },
+  dependencies = {
+    "nvim-tree/nvim-web-devicons",
+    "stevearc/dressing.nvim",
+    "nvim-lua/plenary.nvim",
+    "MunifTanjim/nui.nvim",
+  },
+}
+```
+
+**Option 2: codecompanion.nvim** (Multi-provider support)
+```lua
+-- Add to ~/.config/nvim/lua/plugins/codecompanion.lua
+return {
+  "olimorris/codecompanion.nvim",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    "nvim-treesitter/nvim-treesitter",
+  },
+  config = function()
+    require("codecompanion").setup({
+      adapters = {
+        anthropic = require("codecompanion.adapters").use("anthropic", {
+          env = {
+            api_key = "ANTHROPIC_API_KEY",
+          },
+        }),
+      },
+    })
+  end,
+}
+```
+
+**Option 3: CopilotChat.nvim** (GitHub Copilot)
+Requires GitHub Copilot subscription. LazyVim has built-in extras for this:
+```bash
+# In nvim, run:
+:LazyExtras
+# Enable copilot and copilot-chat
+```
+
+### Persistence Notes
+
+Neovim directories are persisted across reboots:
+- `~/.config/nvim` - Configuration
+- `~/.local/share/nvim` - Plugin data
+- `~/.local/state/nvim` - Shada/session files
+- `~/.cache/nvim` - Plugin download cache
+
 ## Security Notes
 
 - System uses full disk encryption (LUKS)
