@@ -1,1 +1,25 @@
-{"mcpServers":{"ledger":{"args":["run","-v","/home/blyons/finances/main.ledger:/main.ledger","-e","LEDGER_FILE=/main.ledger","-i","--rm","minhyeoky/mcp-ledger"],"command":"docker"},"nixos":{"args":["run","github:utensils/mcp-nixos","--"],"command":"nix"}}}
+{
+  "mcpServers": {
+    "ledger": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-v",
+        "/home/blyons/finances/main.ledger:/main.ledger",
+        "-e",
+        "LEDGER_FILE=/main.ledger",
+        "-i",
+        "--rm",
+        "minhyeoky/mcp-ledger"
+      ]
+    },
+    "nixos": {
+      "command": "nix",
+      "args": ["run", "github:utensils/mcp-nixos", "--"]
+    },
+    "taskwarrior": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-taskwarrior"]
+    }
+  }
+}
