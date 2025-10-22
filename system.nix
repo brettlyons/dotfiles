@@ -111,6 +111,7 @@
   fonts = {
     packages = with pkgs; [
       nerd-fonts.caskaydia-mono
+      nerd-fonts.symbols-only
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-emoji
@@ -147,6 +148,10 @@
 
     # Focusrite Scarlett firmware updater
     scarlett2
+
+    # Spell checking for editors (Doom Emacs, Neovim)
+    hunspell
+    hunspellDicts.en_US-large
   ];
 
   # Git global configuration
@@ -159,6 +164,7 @@
       };
       init.defaultBranch = "main";
       pull.rebase = true;
+      safe.directory = "/home/blyons/workspace/dotfiles";  # Allow root to access user-owned repo
     };
   };
 
@@ -261,16 +267,15 @@
     };
   };
 
-  # Automatic Kali tools installation on first boot
+  # Automatic Kali tools installation - timer-based, non-blocking
   systemd.services.kali-setup = {
     description = "Install Kali Linux headless tools on first boot";
     after = [ "podman-kali.service" ];
     requires = [ "podman-kali.service" ];
-    wantedBy = [ "multi-user.target" ];
+    # Non-blocking: triggered by timer, not wanted by any target
 
-    # Only run once - creates marker file after successful installation
     unitConfig = {
-      ConditionPathExists = "!/persist/system/kali/.setup-complete";
+      DefaultDependencies = false;  # Don't block any system targets
     };
 
     serviceConfig = {
@@ -278,6 +283,14 @@
       RemainAfterExit = true;
       # Wait for container to be fully ready
       ExecStartPre = "${pkgs.coreutils}/bin/sleep 10";
+      # Only run if kali-linux-headless is not already installed
+      ExecCondition = pkgs.writeShellScript "kali-check-setup" ''
+        if ${pkgs.podman}/bin/podman exec kali dpkg -l kali-linux-headless 2>/dev/null | grep -q '^ii'; then
+          echo "Kali tools already installed, skipping setup"
+          exit 1  # Skip execution
+        fi
+        exit 0  # Proceed with installation
+      '';
       ExecStart = pkgs.writeShellScript "kali-setup" ''
         set -e
         echo "Installing Kali Linux headless tools..."
@@ -294,14 +307,22 @@
         # Copy Kali default shell configs
         echo "Configuring shell environment..."
         ${pkgs.podman}/bin/podman exec kali bash -c "
-          cp /etc/skel/.zshrc /root/.zshrc
-          cp /etc/skel/.bashrc /root/.bashrc
+          cp -n /etc/skel/.zshrc /root/.zshrc 2>/dev/null || true
+          cp -n /etc/skel/.bashrc /root/.bashrc 2>/dev/null || true
         "
 
-        # Create marker file to prevent re-running
-        ${pkgs.coreutils}/bin/touch /persist/system/kali/.setup-complete
         echo "Kali Linux setup complete!"
       '';
+    };
+  };
+
+  # Timer to trigger kali-setup 2 minutes after boot
+  systemd.timers.kali-setup = {
+    description = "Timer for Kali Linux setup";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "2min";  # Run 2 minutes after boot
+      Unit = "kali-setup.service";
     };
   };
 
@@ -372,18 +393,12 @@
     };
   };
 
-  # Display manager - greetd with tuigreet
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        user = "greeter";
-      };
-    };
-  };
+  # Display manager - greetd with regreet
+  services.greetd.enable = true;
 
   programs.regreet = {
     enable = true;
+    # Regreet will automatically configure greetd to launch in cage compositor
   };
 
   # Enable flakes and build optimizations

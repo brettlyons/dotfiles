@@ -169,6 +169,8 @@
     pwvucontrol # PipeWire audio device manager
     wlogout # Logout menu
     hyprlock # Screen locker
+    hypridle # Idle management daemon
+    brightnessctl # Screen brightness control
     qalculate-gtk # Calculator (qalc CLI for Walker)
     libnotify # Desktop notifications (notify-send)
 
@@ -211,6 +213,9 @@
     black # Python formatter
     nodePackages.prettier
     markdownlint-cli2 # Markdown linter
+
+    # Dictionary wordlist for prose autocomplete in Neovim
+    scowl # Comprehensive English wordlist
 
     # Keyboard configuration
     keymapp # ZSA keyboard configuration (Ergodox EZ, Moonlander, etc.)
@@ -477,6 +482,7 @@
     enableBashIntegration = true;
     enableZshIntegration = true;
     nix-direnv.enable = true; # Better Nix integration with caching
+    config.global.hide_env_diff = true; # Suppress verbose export list
   };
 
   # fzf - command-line fuzzy finder
@@ -791,6 +797,50 @@
   services.cliphist = {
     enable = true;
     allowImages = true;
+  };
+
+  # Hypridle - automatic idle management
+  services.hypridle = {
+    enable = true;
+    settings = {
+      general = {
+        lock_cmd = "pidof hyprlock || hyprlock"; # Lock command (avoid starting hyprlock if already running)
+        before_sleep_cmd = "loginctl lock-session"; # Lock before suspend
+        after_sleep_cmd = "hyprctl dispatch dpms on"; # Turn display back on after resume
+      };
+
+      listener = [
+        {
+          timeout = 180; # 3 minutes
+          on-timeout = "brightnessctl -s set 10%"; # Dim screen to 10%
+          on-resume = "brightnessctl -r"; # Restore brightness
+        }
+        {
+          timeout = 600; # 10 minutes
+          on-timeout = "loginctl lock-session"; # Lock the session
+        }
+        {
+          timeout = 630; # 10.5 minutes
+          on-timeout = "hyprctl dispatch dpms off"; # Turn off display
+          on-resume = "hyprctl dispatch dpms on"; # Turn display back on
+        }
+      ];
+    };
+  };
+
+  # Gammastep - color temperature adjustment for day/night
+  services.gammastep = {
+    enable = true;
+    provider = "manual";
+    latitude = 39.7;  # Denver, CO (adjust to your location)
+    longitude = -104.9;
+    temperature = {
+      day = 6500;    # Neutral white during day
+      night = 3500;  # Warm at night (reduces blue light)
+    };
+    settings = {
+      general.adjustment-method = "wayland";
+    };
   };
 
   # zoxide - smarter cd command
