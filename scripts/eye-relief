@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Eye relief reminder script
+# 20-20-20 rule: Every 20 minutes, look at something 20 feet away for 20 seconds
+
+# Array of eye relief reminders
+messages=(
+  "👁️ Take a 20-second break - Look 20 feet away"
+  "👁️ Rest your eyes - Gaze into the distance"
+  "👁️ Eye break time - Look away from the screen"
+  "👁️ 20-20-20 rule - Protect your vision"
+  "👁️ Blink and breathe - Rest your eyes"
+)
+
+# Pick a random message
+message="${messages[$RANDOM % ${#messages[@]}]}"
+
+# Show notification for 20 seconds
+notify-send \
+  --urgency=normal \
+  --expire-time=20000 \
+  --app-name="eye-relief" \
+  "Eye Relief Reminder" \
+  "$message"

@@ -56,6 +56,12 @@
         source = ../scripts/breathe-reminder;
         executable = true;
       };
+
+      # eye-relief script
+      ".local/bin/eye-relief" = {
+        source = ../scripts/eye-relief;
+        executable = true;
+      };
     };
   };
 
@@ -786,6 +792,32 @@
       OnBootSec = "1min"; # First trigger 1 minute after boot
       OnUnitActiveSec = "20s"; # Base interval of 20 seconds
       RandomizedDelaySec = "30min"; # Add random delay up to 30 minutes
+      Persistent = false;
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
+  };
+
+  # Eye relief reminder systemd service
+  systemd.user.services.eye-relief = {
+    Unit = {
+      Description = "Eye relief reminder (20-20-20 rule)";
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${config.home.homeDirectory}/.local/bin/eye-relief";
+    };
+  };
+
+  # Eye relief timer - triggers every 20 minutes
+  systemd.user.timers.eye-relief = {
+    Unit = {
+      Description = "Timer for eye relief reminders";
+    };
+    Timer = {
+      OnBootSec = "20min"; # First trigger 20 minutes after boot
+      OnUnitActiveSec = "20min"; # Repeat every 20 minutes
       Persistent = false;
     };
     Install = {
