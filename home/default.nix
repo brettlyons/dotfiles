@@ -158,6 +158,7 @@
     claude-code
     python3 # Python interpreter (needed for taskwarrior)
     timewarrior
+    gh # GitHub CLI
 
     # System tools
     htop
@@ -229,6 +230,9 @@
     # Media
     mpv
     vlc
+
+    # Office suite
+    libreoffice-fresh
   ];
 
   home.pointerCursor = {
