@@ -289,7 +289,7 @@
       # Dynamic cursor plugin configuration
       "plugin:dynamic-cursors" = {
         enabled = true;
-        mode = "rotate"; # Options: none, tilt, rotate, stretch
+        mode = "stretch"; # Options: none, tilt, rotate, stretch
 
         # Shake to find configuration
         shake = {
