@@ -386,10 +386,11 @@
         executable = "${pkgs.slack}/bin/slack";
         profile = "${pkgs.firejail}/etc/firejail/slack.profile";
       };
-      webcord = {
-        executable = "${pkgs.webcord}/bin/webcord";
-        profile = "${pkgs.firejail}/etc/firejail/discord.profile";
-      };
+      # webcord removed from firejail to enable screensharing
+      # webcord = {
+      #   executable = "${pkgs.webcord}/bin/webcord";
+      #   profile = "${pkgs.firejail}/etc/firejail/discord.profile";
+      # };
     };
   };
 

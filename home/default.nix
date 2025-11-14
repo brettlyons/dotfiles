@@ -7,6 +7,10 @@
 }:
 
 {
+  imports = [
+    # ./notes-sync.nix
+  ];
+
   # Disable Stylix for Neovim (LazyVim will manage configuration)
   stylix.targets.neovim.enable = false;
 
@@ -121,6 +125,7 @@
     zoom-us
     slack
     webcord
+    discord
 
     # Sandboxing tools
     firejail
@@ -180,6 +185,7 @@
     brightnessctl # Screen brightness control
     qalculate-gtk # Calculator (qalc CLI for Walker)
     libnotify # Desktop notifications (notify-send)
+    bc
 
     # Screenshot & recording tools
     grim # Screenshot utility for Wayland
@@ -685,10 +691,10 @@
 
         "custom/hypridle" = {
           format = "{}";
-          exec = "systemctl --user is-active hypridle-inhibit.service &>/dev/null && echo '󰅶' || echo '󰾪'";
+          exec = "systemctl --user is-active hypridle.service &>/dev/null && echo '󰾪' || echo '󰅶'";
           interval = 2;
           signal = 8;
-          on-click = "systemctl --user is-active hypridle-inhibit.service &>/dev/null && (systemctl --user stop hypridle-inhibit.service && notify-send 'Hypridle' 'Enabled') || (systemd-run --user --unit=hypridle-inhibit.service systemd-inhibit --what=idle --who=waybar --why='User disabled idle' --mode=block sleep infinity && notify-send 'Hypridle' 'Disabled'); pkill -RTMIN+8 waybar";
+          on-click = "systemctl --user is-active hypridle.service &>/dev/null && (systemctl --user stop hypridle.service && notify-send 'Hypridle' 'Disabled - screen will not lock') || (systemctl --user start hypridle.service && notify-send 'Hypridle' 'Enabled - screen will lock after idle'); pkill -RTMIN+8 waybar";
           tooltip-format = "Click to toggle idle timeout";
         };
 
