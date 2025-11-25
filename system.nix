@@ -152,6 +152,9 @@
     # Spell checking for editors (Doom Emacs, Neovim)
     hunspell
     hunspellDicts.en_US-large
+
+    # Remote desktop client
+    freerdp         # RDP client (xfreerdp)
   ];
 
   # Git global configuration
