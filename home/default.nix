@@ -239,6 +239,9 @@
 
     # Office suite
     libreoffice-fresh
+
+    # Document conversion
+    pandoc
   ];
 
   home.pointerCursor = {
