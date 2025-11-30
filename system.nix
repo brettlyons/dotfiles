@@ -419,6 +419,9 @@
     options = "--delete-older-than 30d";  # Delete unreferenced paths older than 30 days
   };
 
+  # Automatic store optimization
+  nix.optimise.automatic = true;
+
   # Automatic system updates
   system.autoUpgrade = {
     enable = true;
