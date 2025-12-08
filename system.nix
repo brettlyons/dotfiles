@@ -107,6 +107,9 @@
   # ZSA keyboard support (ErgoDox EZ, Moonlander, etc.)
   hardware.keyboard.zsa.enable = true;
 
+  # Thunderbolt device management
+  services.hardware.bolt.enable = true;
+
   # System fonts
   fonts = {
     packages = with pkgs; [
