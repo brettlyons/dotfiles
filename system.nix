@@ -384,6 +384,12 @@
     xwayland.enable = true;
   };
 
+  # COSMIC Desktop Environment (for testing)
+  services.desktopManager.cosmic = {
+    enable = true;
+    xwayland.enable = true;
+  };
+
   # Firejail sandboxing
   programs.firejail = {
     enable = true;

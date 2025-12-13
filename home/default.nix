@@ -138,6 +138,8 @@
     tcpdump
     burpsuite
     caido
+    ffuf # Web fuzzer
+    feroxbuster # Recursive content discovery
 
     # Forensics & analysis tools
     binutils # strings, objdump, etc.

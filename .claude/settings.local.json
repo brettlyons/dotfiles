@@ -7,7 +7,9 @@
       "WebSearch",
       "Bash(systemctl:*)",
       "mcp__taskwarrior__mark_task_done",
-      "Bash(ssh:*)"
+      "Bash(ssh:*)",
+      "Bash(pandoc:*)",
+      "WebFetch(domain:nixos.org)"
     ]
   },
   "enableAllProjectMcpServers": true,
