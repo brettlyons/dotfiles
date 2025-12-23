@@ -229,6 +229,8 @@
       # Mouse
       allow id 1bcf:0005 serial "" name "USB Optical Mouse" hash "MZJHJAlLoXHFOsLGDiCcWprsu32/NU61IupjvjY6Lgs=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" via-port "1-3" with-interface 03:01:02 with-connect-type "hotplug"
 
+      allow id 046d:c53f serial "" name "USB Receiver" hash "fRDEwQp86VVIl+aIZDBXg6r2c93JsPf1hpFr0iim7iU=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" via-port "1-10" with-interface { 03:01:01 03:01:02 03:00:00 } with-connect-type "hotplug"
+
       # Webcam
       allow id 046d:0825 serial "E5AF8F00" name "C270 HD WEBCAM" hash "Qv/xAJAykpwDlrjYh0gXVDZokVu6C3vBT56kPzn/DHg=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 0e:01:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 01:01:00 01:02:00 01:02:00 01:02:00 01:02:00 01:02:00 } with-connect-type "hotplug"
 

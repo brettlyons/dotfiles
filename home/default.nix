@@ -163,8 +163,9 @@
     firefox
     tridactyl-native # Native messenger for Tridactyl Firefox extension
     claude-code
+    goose-cli
     python3 # Python interpreter (needed for taskwarrior)
-    timewarrior
+    # timewarrior
     gh # GitHub CLI
 
     # System tools
@@ -188,6 +189,7 @@
     qalculate-gtk # Calculator (qalc CLI for Walker)
     libnotify # Desktop notifications (notify-send)
     bc
+    zathura # pdf reader
 
     # Screenshot & recording tools
     grim # Screenshot utility for Wayland
