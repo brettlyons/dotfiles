@@ -3,6 +3,7 @@
   lib,
   pkgs,
   userConfig,
+  llm-agents,
   ...
 }:
 
@@ -162,8 +163,8 @@
     vscode
     firefox
     tridactyl-native # Native messenger for Tridactyl Firefox extension
-    claude-code
-    goose-cli
+    llm-agents.packages.${pkgs.system}.claude-code
+    llm-agents.packages.${pkgs.system}.goose-cli
     python3 # Python interpreter (needed for taskwarrior)
     # timewarrior
     gh # GitHub CLI

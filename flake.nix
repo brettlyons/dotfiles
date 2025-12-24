@@ -26,9 +26,13 @@
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware/master";
     };
+
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, stylix, impermanence, sops-nix, nixos-hardware, ... }:
+  outputs = { self, nixpkgs, home-manager, stylix, impermanence, sops-nix, nixos-hardware, llm-agents, ... }:
   let
     system = "x86_64-linux";
 
@@ -87,7 +91,7 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               backupFileExtension = "backup";
-              extraSpecialArgs = { inherit userConfig; };
+              extraSpecialArgs = { inherit userConfig llm-agents; };
               users.${userConfig.username} = {
                 imports = [
                   ./home/default.nix
