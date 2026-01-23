@@ -277,6 +277,32 @@ Neovim directories are persisted across reboots:
 - `~/.local/state/nvim` - Shada/session files
 - `~/.cache/nvim` - Plugin download cache
 
+## Tasks Directory
+
+The `tasks/` directory contains documentation from troubleshooting sessions and complex configuration changes. Each task is stored in a numbered subdirectory (e.g., `001-firefox-troubleshooting/`).
+
+### Structure
+
+```
+tasks/
+└── 001-firefox-troubleshooting/
+    ├── task_plan.md    # Phases, decisions, and status
+    └── notes.md        # Research findings and context
+```
+
+### Purpose
+
+- **Persistent knowledge**: Captures root causes and solutions for future reference
+- **Reproducibility**: Documents what changed and why
+- **Pattern**: Uses the "planning-with-files" approach - plan first, track progress, store findings in files rather than context
+
+### File Conventions
+
+- `task_plan.md`: Goal, phases with checkboxes, decisions made, errors encountered, final status
+- `notes.md`: Research findings, system context, source references
+
+New tasks should increment the number prefix (e.g., `002-next-issue/`).
+
 ## Security Notes
 
 - System uses full disk encryption (LUKS)
