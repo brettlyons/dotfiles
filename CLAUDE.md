@@ -279,6 +279,8 @@ Neovim directories are persisted across reboots:
 
 ## Tasks Directory
 
+**Always use the `planning-with-files` skill** (invoke with `/planning-with-files` or ask Claude to use the "manus" planning approach) for non-trivial tasks in this repository. This ensures consistent documentation and tracking.
+
 The `tasks/` directory contains documentation from troubleshooting sessions and complex configuration changes. Each task is stored in a numbered subdirectory (e.g., `001-firefox-troubleshooting/`).
 
 ### Structure
