@@ -166,6 +166,9 @@
 
     # Remote desktop client
     freerdp         # RDP client (xfreerdp)
+
+    # Windows VM drivers
+    virtio-win      # VirtIO drivers ISO for Windows guests
   ];
 
   # Git global configuration (user config is in home-manager)

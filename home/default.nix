@@ -168,8 +168,6 @@ in
 
     # Development
     vscode
-    firefox
-    tridactyl-native # Native messenger for Tridactyl Firefox extension
     llm.claude-code
     llm.goose-cli
     llm.forge
@@ -293,6 +291,15 @@ in
     enable = true;
     extensions = [
       "nngceckbapebfimnlniiiahkandclblb" # Bitwarden
+    ];
+  };
+
+  # Firefox with native messaging hosts for extensions
+  programs.firefox = {
+    enable = true;
+    nativeMessagingHosts = [
+      pkgs.kdePackages.plasma-browser-integration
+      pkgs.tridactyl-native
     ];
   };
 
