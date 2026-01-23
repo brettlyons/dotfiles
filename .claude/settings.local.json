@@ -16,6 +16,8 @@
       "Bash(fc-match:*)",
       "Bash(fc-cache:*)",
       "Bash(which:*)",
+      "Bash(rg:*)",
+      "Bash(fd:*)",
       "Bash(journalctl:*)",
       "Bash(systemctl:*)",
       "Bash(ssh:*)",
