@@ -1,15 +1,33 @@
 {
   "permissions": {
     "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(ls:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(nix flake check:*)",
+      "Bash(nix flake show:*)",
+      "Bash(nix eval:*)",
+      "Bash(fc-list:*)",
+      "Bash(fc-match:*)",
+      "Bash(fc-cache:*)",
+      "Bash(which:*)",
       "Bash(journalctl:*)",
-      "mcp__nixos__home_manager_search",
-      "mcp__nixos__nixos_search",
-      "WebSearch",
       "Bash(systemctl:*)",
-      "mcp__taskwarrior__mark_task_done",
       "Bash(ssh:*)",
       "Bash(pandoc:*)",
-      "WebFetch(domain:nixos.org)"
+      "mcp__nixos__nix",
+      "mcp__nixos__nix_versions",
+      "mcp__nixos__home_manager_search",
+      "mcp__nixos__nixos_search",
+      "mcp__taskwarrior__get_next_tasks",
+      "mcp__taskwarrior__mark_task_done",
+      "WebSearch",
+      "WebFetch"
     ]
   },
   "enableAllProjectMcpServers": true,
