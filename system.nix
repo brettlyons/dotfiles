@@ -100,12 +100,20 @@
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
-      intel-media-driver  # VA-API for Intel GPUs (Broadwell+)
+      intel-media-driver     # VA-API for Intel GPUs (Broadwell+)
+      rocmPackages.clr       # ROCm OpenCL runtime for AMD GPUs
+      rocmPackages.clr.icd   # OpenCL ICD loader
     ];
   };
 
   # ZSA keyboard support (ErgoDox EZ, Moonlander, etc.)
   hardware.keyboard.zsa.enable = true;
+
+  # QMK keyboard support (udev rules for flashing)
+  hardware.keyboard.qmk.enable = true;
+
+  # VIA keyboard configuration udev rules
+  services.udev.packages = [ pkgs.via ];
 
   # Thunderbolt device management
   services.hardware.bolt.enable = true;
@@ -117,7 +125,7 @@
       nerd-fonts.symbols-only
       noto-fonts
       noto-fonts-cjk-sans
-      noto-fonts-emoji
+      noto-fonts-color-emoji
     ];
 
     fontconfig = {
@@ -160,25 +168,17 @@
     freerdp         # RDP client (xfreerdp)
   ];
 
-  # Git global configuration
+  # Git global configuration (user config is in home-manager)
   programs.git = {
     enable = true;
-    config = {
-      user = {
-        name = userConfig.full_name;
-        email = userConfig.email_address;
-      };
-      init.defaultBranch = "main";
-      pull.rebase = true;
-      safe.directory = "/home/blyons/workspace/dotfiles";  # Allow root to access user-owned repo
-    };
+    config.safe.directory = "/home/${userConfig.username}/workspace/dotfiles";  # Allow root to access user-owned repo
   };
 
   # User account
   users.users.${userConfig.username} = {
     isNormalUser = true;
     description = userConfig.full_name;
-    extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" "docker" "podman" "audio" ];
+    extraGroups = [ "networkmanager" "wheel" "wireshark" "plugdev" "docker" "podman" "audio" "render" "video" "libvirtd" ];
     shell = pkgs.zsh;
     hashedPasswordFile = config.sops.secrets.blyons_password.path;
     openssh.authorizedKeys.keys = [
@@ -252,6 +252,17 @@
     dockerCompat = false;  # Keep docker separate
     defaultNetwork.settings.dns_enabled = true;
   };
+
+  # QEMU/KVM virtualization
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      package = pkgs.qemu_kvm;
+      runAsRoot = true;
+      swtpm.enable = true;  # TPM emulation for Windows 11
+    };
+  };
+  programs.virt-manager.enable = true;
 
   # Kali Linux declarative container
   virtualisation.oci-containers = {
@@ -379,12 +390,8 @@
     notifications.wall.enable = true;
   };
 
-  # Hyprland
-  programs.hyprland = {
-    enable = true;
-    withUWSM = true;
-    xwayland.enable = true;
-  };
+  # KDE Plasma 6 Desktop Environment
+  services.desktopManager.plasma6.enable = true;
 
   # COSMIC Desktop Environment (for testing)
   services.desktopManager.cosmic = {
@@ -408,12 +415,10 @@
     };
   };
 
-  # Display manager - greetd with regreet
-  services.greetd.enable = true;
-
-  programs.regreet = {
+  # Display manager - SDDM for KDE Plasma
+  services.displayManager.sddm = {
     enable = true;
-    # Regreet will automatically configure greetd to launch in cage compositor
+    wayland.enable = true;
   };
 
   # Enable flakes and build optimizations
@@ -441,6 +446,10 @@
     flake = "/home/blyons/workspace/dotfiles#bamboo";
     dates = "04:00";  # Run daily at 4 AM
     allowReboot = false;  # Don't automatically reboot
+    flags = [
+      "--recreate-lock-file"
+      # "--commit-lock-file"  # Requires git identity for root
+    ];
   };
 
   # System version

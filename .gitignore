@@ -1,3 +1,7 @@
+# Wallpaper images
+*.jpg
+*.png
+
 # Nix build results
 result
 result-*

@@ -7,6 +7,14 @@
   ...
 }:
 
+let
+  llm = llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  sharedAliases = {
+    kali = "sudo podman exec -it kali bash";
+    cat = "bat";
+    ls = "eza";
+  };
+in
 {
   imports = [
     # ./notes-sync.nix
@@ -73,9 +81,9 @@
   # Git configuration using userConfig
   programs.git = {
     enable = true;
-    userName = userConfig.full_name;
-    userEmail = userConfig.email_address;
-    extraConfig = {
+    settings = {
+      user.name = userConfig.full_name;
+      user.email = userConfig.email_address;
       init.defaultBranch = "main";
       pull.rebase = true;
     };
@@ -125,7 +133,7 @@
     # Communication
     zoom-us
     slack
-    webcord
+    # webcord
     discord
 
     # Sandboxing tools
@@ -157,14 +165,14 @@
     wordlists
     sleuthkit # Disk forensics toolkit
     foremost # File carving tool
-    bulk_extractor # Extract information from disk images
 
     # Development
     vscode
     firefox
     tridactyl-native # Native messenger for Tridactyl Firefox extension
-    llm-agents.packages.${pkgs.system}.claude-code
-    llm-agents.packages.${pkgs.system}.goose-cli
+    llm.claude-code
+    llm.goose-cli
+    llm.forge
     python3 # Python interpreter (needed for taskwarrior)
     # timewarrior
     gh # GitHub CLI
@@ -237,16 +245,32 @@
 
     # Keyboard configuration
     keymapp # ZSA keyboard configuration (Ergodox EZ, Moonlander, etc.)
+    qmk # QMK firmware CLI (build, flash, configure)
+    dfu-programmer # AVR-based keyboard flashing
+    dfu-util # ARM-based keyboard flashing
+    via # Live keyboard configuration (if firmware supports VIA)
+    dos2unix # Line ending conversion (required by QMK)
 
     # Media
+    yt-dlp
     mpv
     vlc
+    ffmpeg
 
     # Office suite
     libreoffice-fresh
 
     # Document conversion
     pandoc
+    (texliveSmall.withPackages (ps: with ps; [
+      xetex
+      latexmk
+      enumitem
+      xcolor
+      sectsty
+      fancyhdr
+      multicolrule  # adds multicol with column rules support
+    ]))
   ];
 
   home.pointerCursor = {
@@ -272,12 +296,12 @@
     ];
   };
 
-  # Hyprland configuration (colors handled by Stylix)
+  # Hyprland configuration (disabled - using KDE Plasma)
   wayland.windowManager.hyprland = {
-    enable = true;
-    plugins = [
-      pkgs.hyprlandPlugins.hypr-dynamic-cursors
-    ];
+    enable = false;
+    # plugins = [
+    #   pkgs.hyprlandPlugins.hypr-dynamic-cursors
+    # ];
     settings = {
       "$mod" = "SUPER";
 
@@ -301,17 +325,17 @@
       };
 
       # Dynamic cursor plugin configuration
-      "plugin:dynamic-cursors" = {
-        enabled = true;
-        mode = "stretch"; # Options: none, tilt, rotate, stretch
+      # "plugin:dynamic-cursors" = {
+      #   enabled = true;
+      #   mode = "stretch"; # Options: none, tilt, rotate, stretch
 
-        # Shake to find configuration
-        shake = {
-          enabled = true;
-          threshold = 4.0; # Sensitivity
-          factor = 1.5; # How much bigger the cursor gets
-        };
-      };
+      #   # Shake to find configuration
+      #   shake = {
+      #     enabled = true;
+      #     threshold = 4.0; # Sensitivity
+      #     factor = 1.5; # How much bigger the cursor gets
+      #   };
+      # };
 
       # Keyboard layout
       input = {
@@ -469,11 +493,7 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
-    shellAliases = {
-      kali = "sudo podman exec -it kali bash";
-      cat = "bat";
-      ls = "eza";
-    };
+    shellAliases = sharedAliases;
 
     history = {
       size = 10000;
@@ -495,9 +515,7 @@
   # Keep bash as fallback
   programs.bash = {
     enable = true;
-    shellAliases = {
-      kali = "sudo podman exec -it kali bash";
-    };
+    shellAliases = sharedAliases;
   };
 
   # direnv - automatic environment switching
@@ -540,9 +558,9 @@
     ];
   };
 
-  # Fuzzel launcher (styled by Stylix)
+  # Fuzzel launcher (disabled - KDE has KRunner)
   programs.fuzzel = {
-    enable = true;
+    enable = false;
     settings = {
       main = {
         terminal = "${pkgs.alacritty}/bin/alacritty";
@@ -588,16 +606,16 @@
     enableZshIntegration = true;
   };
 
-  # Walker application launcher
+  # Walker application launcher (disabled - KDE has KRunner)
   services.walker = {
-    enable = true;
-    systemd.enable = true;
+    enable = false;
+    systemd.enable = false;
   };
 
-  # Waybar status bar
+  # Waybar status bar (disabled - using KDE Plasma panel)
   programs.waybar = {
-    enable = true;
-    systemd.enable = true;
+    enable = false;
+    systemd.enable = false;
     style = ''
       #custom-hypridle {
         padding: 0 8px;
@@ -772,9 +790,9 @@
     package = pkgs.taskwarrior3;
   };
 
-  # Mako notification daemon
+  # Mako notification daemon (disabled - KDE has built-in notifications)
   services.mako = {
-    enable = true;
+    enable = false;
     extraConfig = ''
       default-timeout=5000
 
@@ -801,21 +819,21 @@
     };
   };
 
-  # Breathing reminder timer - triggers randomly between 20s-30min
-  systemd.user.timers.breathe-reminder = {
-    Unit = {
-      Description = "Timer for breathing reminders";
-    };
-    Timer = {
-      OnBootSec = "1min"; # First trigger 1 minute after boot
-      OnUnitActiveSec = "20s"; # Base interval of 20 seconds
-      RandomizedDelaySec = "30min"; # Add random delay up to 30 minutes
-      Persistent = false;
-    };
-    Install = {
-      WantedBy = [ "timers.target" ];
-    };
-  };
+  # Breathing reminder timer - disabled (was showing in notification box)
+  # systemd.user.timers.breathe-reminder = {
+  #   Unit = {
+  #     Description = "Timer for breathing reminders";
+  #   };
+  #   Timer = {
+  #     OnBootSec = "1min"; # First trigger 1 minute after boot
+  #     OnUnitActiveSec = "20s"; # Base interval of 20 seconds
+  #     RandomizedDelaySec = "30min"; # Add random delay up to 30 minutes
+  #     Persistent = false;
+  #   };
+  #   Install = {
+  #     WantedBy = [ "timers.target" ];
+  #   };
+  # };
 
   # Eye relief reminder systemd service
   systemd.user.services.eye-relief = {
@@ -843,15 +861,15 @@
     };
   };
 
-  # Cliphist - clipboard history manager
+  # Cliphist - clipboard history manager (disabled - KDE has Klipper)
   services.cliphist = {
-    enable = true;
+    enable = false;
     allowImages = true;
   };
 
-  # Hypridle - automatic idle management
+  # Hypridle - automatic idle management (disabled - KDE has built-in power management)
   services.hypridle = {
-    enable = true;
+    enable = false;
     settings = {
       general = {
         lock_cmd = "pidof hyprlock || hyprlock"; # Lock command (avoid starting hyprlock if already running)
@@ -866,11 +884,11 @@
           on-resume = "brightnessctl -r"; # Restore brightness
         }
         {
-          timeout = 600; # 10 minutes
+          timeout = 210; # 3.5 minutes
           on-timeout = "loginctl lock-session"; # Lock the session
         }
         {
-          timeout = 630; # 10.5 minutes
+          timeout = 215; # 3.5 minutes + 5 sec
           on-timeout = "hyprctl dispatch dpms off"; # Turn off display
           on-resume = "hyprctl dispatch dpms on"; # Turn display back on
         }
@@ -878,9 +896,9 @@
     };
   };
 
-  # Gammastep - color temperature adjustment for day/night
+  # Gammastep - color temperature adjustment (disabled - KDE has Night Color)
   services.gammastep = {
-    enable = true;
+    enable = false;
     provider = "manual";
     latitude = 39.7;  # Denver, CO (adjust to your location)
     longitude = -104.9;

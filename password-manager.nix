@@ -4,8 +4,8 @@ with lib;
 
 let
   cfg = config.services.passwordManager;
-  normalUsers = builtins.attrNames (lib.filterAttrs 
-    (name: user: user.isNormalUser) 
+  normalUsers = builtins.attrNames (lib.filterAttrs
+    (name: user: user.isNormalUser)
     config.users.users);
 in
 {
@@ -52,9 +52,9 @@ in
 
     # Bitwarden configuration
     (mkIf (cfg.provider == "bitwarden") {
-      environment.systemPackages = with pkgs; 
+      environment.systemPackages = with pkgs;
         (optional cfg.cli rbw) ++
-        (optional cfg.gui bitwarden);
+        (optional cfg.gui bitwarden-desktop);
 
       # Optional: Configure rbw for CLI usage
       environment.etc."rbw/config.json" = mkIf cfg.cli {
