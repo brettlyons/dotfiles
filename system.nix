@@ -155,7 +155,7 @@
     parted          # Partition management
     lsof            # List open files (useful for umount)
     usbutils        # lsusb and USB device info
-    usbguard-notifier  # GUI notifications for USB device authorization
+    # usbguard-notifier  # GUI notifications for USB device authorization (disabled - no approve workflow)
 
     # Focusrite Scarlett firmware updater
     scarlett2
@@ -215,36 +215,37 @@
   };
 
   # USBGuard - USB device authorization
-  services.usbguard = {
-    enable = true;
-    dbus.enable = true;  # Enable DBus interface for GUI tools
-    IPCAllowedGroups = [ "wheel" ];  # Allow wheel group to manage USBGuard
-    rules = ''
-      # USB Host Controllers
-      allow id 1d6b:0002 serial "0000:00:14.0" name "xHCI Host Controller" hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" parent-hash "rV9bfLq7c2eA4tYjVjwO4bxhm+y6GgZpl9J60L0fBkY=" with-interface 09:00:00 with-connect-type ""
-      allow id 1d6b:0003 serial "0000:00:14.0" name "xHCI Host Controller" hash "prM+Jby/bFHCn2lNjQdAMbgc6tse3xVx+hZwjOPHSdQ=" parent-hash "rV9bfLq7c2eA4tYjVjwO4bxhm+y6GgZpl9J60L0fBkY=" with-interface 09:00:00 with-connect-type ""
-      allow id 1d6b:0002 serial "0000:1f:00.0" name "xHCI Host Controller" hash "s9V4liDJBlYv0+TNjNWwxkz0EWwkcRoOHjIobLr2uFI=" parent-hash "y/hBL2KpMx2UFGN3ppStuUznESYeHZhJ6Qkt8Mpe+Mo=" with-interface 09:00:00 with-connect-type ""
-      allow id 1d6b:0003 serial "0000:1f:00.0" name "xHCI Host Controller" hash "50SSBXfvZ255h/FXcWZ0b593U5ZfiVv3Eyhg7MCzlFU=" parent-hash "y/hBL2KpMx2UFGN3ppStuUznESYeHZhJ6Qkt8Mpe+Mo=" with-interface 09:00:00 with-connect-type ""
-
-      # Audio interface
-      allow id 1235:8219 serial "S248F3E53ADA1C" name "Scarlett 2i2 4th Gen" hash "Rnoy9xBy42cKIsCQKa1JuIv9332uLEhk5DGhPcO0IsE=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 01:01:20 01:02:20 01:02:20 01:02:20 01:02:20 ff:01:20 } with-connect-type "hotplug"
-
-      # Mouse
-      allow id 1bcf:0005 serial "" name "USB Optical Mouse" hash "MZJHJAlLoXHFOsLGDiCcWprsu32/NU61IupjvjY6Lgs=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" via-port "1-3" with-interface 03:01:02 with-connect-type "hotplug"
-
-      allow id 046d:c53f serial "" name "USB Receiver" hash "fRDEwQp86VVIl+aIZDBXg6r2c93JsPf1hpFr0iim7iU=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" via-port "1-10" with-interface { 03:01:01 03:01:02 03:00:00 } with-connect-type "hotplug"
-
-      # Webcam
-      allow id 046d:0825 serial "E5AF8F00" name "C270 HD WEBCAM" hash "Qv/xAJAykpwDlrjYh0gXVDZokVu6C3vBT56kPzn/DHg=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 0e:01:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 01:01:00 01:02:00 01:02:00 01:02:00 01:02:00 01:02:00 } with-connect-type "hotplug"
-
-      # Keyboard - Ergodox EZ
-      allow id 3297:4974 serial "LzWGM/B4wQwQ" name "Ergodox EZ" hash "D1io106SVqdPNqtz31CiQ6CCx2VLgEOs3kQ3Dq7jKms=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 03:01:01 03:00:00 03:01:02 03:00:00 } with-connect-type "hotplug"
-
-      # USB Flash Drives
-      allow id 154b:1006 serial "900049E75567BD58" name "USB 3.2.1 FD" hash "l+gVvaerBZulS5lJuAcqjpwoIMPefZzsIDkmArNvDt0=" parent-hash "prM+Jby/bFHCn2lNjQdAMbgc6tse3xVx+hZwjOPHSdQ=" with-interface 08:06:50 with-connect-type "hotplug"
-      allow id 125f:db8a serial "26324232500701AC" name "ADATA USB Flash Drive" hash "MvN59p6tTlMJ0qTouhGVdfXybiyltuOCLQE6wDccdZQ=" parent-hash "prM+Jby/bFHCn2lNjQdAMbgc6tse3xVx+hZwjOPHSdQ=" with-interface 08:06:50 with-connect-type "hotplug"
-    '';
-  };
+  # DISABLED: No notification-to-approve workflow available, blocking new USB devices
+  # services.usbguard = {
+  #   enable = true;
+  #   dbus.enable = true;  # Enable DBus interface for GUI tools
+  #   IPCAllowedGroups = [ "wheel" ];  # Allow wheel group to manage USBGuard
+  #   rules = ''
+  #     # USB Host Controllers
+  #     allow id 1d6b:0002 serial "0000:00:14.0" name "xHCI Host Controller" hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" parent-hash "rV9bfLq7c2eA4tYjVjwO4bxhm+y6GgZpl9J60L0fBkY=" with-interface 09:00:00 with-connect-type ""
+  #     allow id 1d6b:0003 serial "0000:00:14.0" name "xHCI Host Controller" hash "prM+Jby/bFHCn2lNjQdAMbgc6tse3xVx+hZwjOPHSdQ=" parent-hash "rV9bfLq7c2eA4tYjVjwO4bxhm+y6GgZpl9J60L0fBkY=" with-interface 09:00:00 with-connect-type ""
+  #     allow id 1d6b:0002 serial "0000:1f:00.0" name "xHCI Host Controller" hash "s9V4liDJBlYv0+TNjNWwxkz0EWwkcRoOHjIobLr2uFI=" parent-hash "y/hBL2KpMx2UFGN3ppStuUznESYeHZhJ6Qkt8Mpe+Mo=" with-interface 09:00:00 with-connect-type ""
+  #     allow id 1d6b:0003 serial "0000:1f:00.0" name "xHCI Host Controller" hash "50SSBXfvZ255h/FXcWZ0b593U5ZfiVv3Eyhg7MCzlFU=" parent-hash "y/hBL2KpMx2UFGN3ppStuUznESYeHZhJ6Qkt8Mpe+Mo=" with-interface 09:00:00 with-connect-type ""
+  #
+  #     # Audio interface
+  #     allow id 1235:8219 serial "S248F3E53ADA1C" name "Scarlett 2i2 4th Gen" hash "Rnoy9xBy42cKIsCQKa1JuIv9332uLEhk5DGhPcO0IsE=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 01:01:20 01:02:20 01:02:20 01:02:20 01:02:20 ff:01:20 } with-connect-type "hotplug"
+  #
+  #     # Mouse
+  #     allow id 1bcf:0005 serial "" name "USB Optical Mouse" hash "MZJHJAlLoXHFOsLGDiCcWprsu32/NU61IupjvjY6Lgs=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" via-port "1-3" with-interface 03:01:02 with-connect-type "hotplug"
+  #
+  #     allow id 046d:c53f serial "" name "USB Receiver" hash "fRDEwQp86VVIl+aIZDBXg6r2c93JsPf1hpFr0iim7iU=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" via-port "1-10" with-interface { 03:01:01 03:01:02 03:00:00 } with-connect-type "hotplug"
+  #
+  #     # Webcam
+  #     allow id 046d:0825 serial "E5AF8F00" name "C270 HD WEBCAM" hash "Qv/xAJAykpwDlrjYh0gXVDZokVu6C3vBT56kPzn/DHg=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 0e:01:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 0e:02:00 01:01:00 01:02:00 01:02:00 01:02:00 01:02:00 01:02:00 } with-connect-type "hotplug"
+  #
+  #     # Keyboard - Ergodox EZ
+  #     allow id 3297:4974 serial "LzWGM/B4wQwQ" name "Ergodox EZ" hash "D1io106SVqdPNqtz31CiQ6CCx2VLgEOs3kQ3Dq7jKms=" parent-hash "jEP/6WzviqdJ5VSeTUY8PatCNBKeaREvo2OqdplND/o=" with-interface { 03:01:01 03:00:00 03:01:02 03:00:00 } with-connect-type "hotplug"
+  #
+  #     # USB Flash Drives
+  #     allow id 154b:1006 serial "900049E75567BD58" name "USB 3.2.1 FD" hash "l+gVvaerBZulS5lJuAcqjpwoIMPefZzsIDkmArNvDt0=" parent-hash "prM+Jby/bFHCn2lNjQdAMbgc6tse3xVx+hZwjOPHSdQ=" with-interface 08:06:50 with-connect-type "hotplug"
+  #     allow id 125f:db8a serial "26324232500701AC" name "ADATA USB Flash Drive" hash "MvN59p6tTlMJ0qTouhGVdfXybiyltuOCLQE6wDccdZQ=" parent-hash "prM+Jby/bFHCn2lNjQdAMbgc6tse3xVx+hZwjOPHSdQ=" with-interface 08:06:50 with-connect-type "hotplug"
+  #   '';
+  # };
 
   # Docker
   virtualisation.docker.enable = true;

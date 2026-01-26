@@ -488,7 +488,7 @@ in
 
       # Autostart applications
       exec-once = [
-        "usbguard-notifier" # GUI notifications for USB device authorization
+        # "usbguard-notifier" # GUI notifications for USB device authorization (disabled)
       ];
     };
   };
