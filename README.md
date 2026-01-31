@@ -24,14 +24,14 @@ cd ~/workspace/dotfiles
 # Update hardware-configuration.nix for your system
 
 # Build and activate
-sudo nixos-rebuild switch --flake .#bamboo
+sudo nixos-rebuild switch --flake .#homecore-ops
 ```
 
 ## Common Commands
 
 ```bash
 # Rebuild system
-sudo nixos-rebuild switch --flake .#bamboo
+sudo nixos-rebuild switch --flake .#homecore-ops
 
 # Update all dependencies
 nix flake update

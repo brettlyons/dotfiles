@@ -194,7 +194,7 @@
 
   # Networking
   networking = {
-    hostName = "bamboo";
+    hostName = "homecore-ops";
     networkmanager.enable = true;
     firewall = {
       enable = true;
@@ -367,6 +367,19 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+    # Disable automatic stream corking (pausing) when browsers load media
+    wireplumber.extraConfig = {
+      "50-disable-role-ducking" = {
+        "wireplumber.settings" = {
+          "linking.allow-moving-streams" = true;
+        };
+        "wireplumber.profiles" = {
+          main = {
+            "filter.cork.enabled" = false;
+          };
+        };
+      };
+    };
   };
 
   # Power management
@@ -447,7 +460,7 @@
   # Automatic system updates
   system.autoUpgrade = {
     enable = true;
-    flake = "/home/blyons/workspace/dotfiles#bamboo";
+    flake = "/home/blyons/workspace/dotfiles#homecore-ops";
     dates = "04:00";  # Run daily at 4 AM
     allowReboot = false;  # Don't automatically reboot
     flags = [

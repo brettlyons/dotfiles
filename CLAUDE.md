@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## System Overview
 
-This is a NixOS 25.05 flake-based configuration for a security workstation named "bamboo" featuring:
+This is a NixOS 25.05 flake-based configuration for a security workstation named "homecore-ops" featuring:
 - **Impermanence**: Root filesystem wiped on every boot using BTRFS subvolumes
 - **Secure Boot**: Lanzaboote for UEFI Secure Boot support
 - **Full Disk Encryption**: LUKS encryption with LVM
@@ -16,13 +16,13 @@ This is a NixOS 25.05 flake-based configuration for a security workstation named
 
 ```bash
 # Rebuild and activate configuration
-sudo nixos-rebuild switch --flake .#bamboo
+sudo nixos-rebuild switch --flake .#homecore-ops
 
 # Test configuration without activating
-sudo nixos-rebuild test --flake .#bamboo
+sudo nixos-rebuild test --flake .#homecore-ops
 
 # Build configuration without activating
-sudo nixos-rebuild build --flake .#bamboo
+sudo nixos-rebuild build --flake .#homecore-ops
 
 # Update all flake inputs
 nix flake update
@@ -43,7 +43,7 @@ nix flake show
 
 The main `flake.nix` defines:
 - **userConfig**: Centralized user settings (username, email, theme) passed to all modules via `specialArgs`
-- **nixosConfigurations.bamboo**: Single host configuration
+- **nixosConfigurations.homecore-ops**: Single host configuration
 - **Module imports**: Hardware config, system, persistence, password-manager, home-manager
 
 ### Key Modules
@@ -137,9 +137,9 @@ Styling (colors, fonts, borders) managed by Stylix with tokyo-night-dark theme.
 
 When modifying configuration:
 1. Edit relevant `.nix` files
-2. Test with `sudo nixos-rebuild test --flake .#bamboo` (non-persistent)
+2. Test with `sudo nixos-rebuild test --flake .#homecore-ops` (non-persistent)
 3. Verify no errors with `nix flake check`
-4. Apply with `sudo nixos-rebuild switch --flake .#bamboo`
+4. Apply with `sudo nixos-rebuild switch --flake .#homecore-ops`
 5. Commit changes to git
 
 For persistence changes:

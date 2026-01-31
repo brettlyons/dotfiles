@@ -44,7 +44,7 @@
     };
   in {
     nixosConfigurations = {
-      bamboo = nixpkgs.lib.nixosSystem {
+      homecore-ops = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit userConfig; };
         modules = [
