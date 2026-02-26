@@ -135,6 +135,7 @@ in
     slack
     # webcord
     discord
+    telegram-desktop
 
     # Sandboxing tools
     firejail
@@ -162,7 +163,6 @@ in
     sqlite # SQLite database CLI
     john # John the Ripper password cracker
     hashcat # GPU-accelerated password cracker
-    wordlists
     sleuthkit # Disk forensics toolkit
     foremost # File carving tool
 

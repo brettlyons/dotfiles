@@ -169,6 +169,9 @@
 
     # Windows VM drivers
     virtio-win      # VirtIO drivers ISO for Windows guests
+
+    # SPICE USB redirection for VMs
+    spice-gtk       # Provides usbredirhost for virt-manager USB passthrough
   ];
 
   # Git global configuration (user config is in home-manager)
@@ -212,6 +215,14 @@
     polkit.enable = true;
     sudo.wheelNeedsPassword = false;
     apparmor.enable = true;
+
+    # SPICE USB redirection ACL helper needs setuid to modify /dev/bus/usb ACLs
+    wrappers.spice-client-glib-usb-acl-helper = {
+      owner = "root";
+      group = "root";
+      setuid = true;
+      source = "${pkgs.spice-gtk}/bin/spice-client-glib-usb-acl-helper";
+    };
   };
 
   # USBGuard - USB device authorization
