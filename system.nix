@@ -148,6 +148,8 @@
     age
     sbctl           # Secure Boot key management
 
+    openvpn         # VPN client
+
     # USB and filesystem tools
     ntfs3g          # NTFS support
     exfat           # exFAT support

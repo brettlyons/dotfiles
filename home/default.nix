@@ -150,6 +150,8 @@ in
     caido
     ffuf # Web fuzzer
     feroxbuster # Recursive content discovery
+    suricata # Network threat detection engine (IDS/IPS)
+    snort # Network intrusion detection/prevention (IDS/IPS)
 
     # Forensics & analysis tools
     binutils # strings, objdump, etc.
@@ -187,6 +189,8 @@ in
     bat # Better cat with syntax highlighting
     tealdeer # tldr man pages
     wtype # Wayland text typing tool (xdotool for Wayland)
+    tmux # Terminal multiplexer
+    zellij # Modern terminal multiplexer
     wl-clipboard # Wayland clipboard utilities
     pwvucontrol # PipeWire audio device manager
     wlogout # Logout menu
